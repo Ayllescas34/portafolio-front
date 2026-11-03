@@ -6,6 +6,9 @@ import { randomBytes } from 'node:crypto';
 process.env['E2E_ADMIN_EMAIL'] ??= 'e2e-admin@test.local';
 process.env['E2E_ADMIN_PASSWORD'] ??= `e2e-${randomBytes(12).toString('hex')}-1`;
 
+// The API lives in its own repository: by default, cloned next to this one.
+const backendDir = process.env['BACKEND_DIR'] ?? '../backend';
+
 export default defineConfig({
   testDir: './e2e',
   // The suites share one database: run them in order, one worker.
@@ -29,7 +32,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'node ../backend/scripts/e2e-server.mjs',
+      command: `node ${backendDir}/scripts/e2e-server.mjs`,
       url: 'http://localhost:3100/api/health',
       reuseExistingServer: false,
       timeout: 180_000,

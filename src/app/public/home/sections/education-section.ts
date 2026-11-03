@@ -30,6 +30,9 @@ import { PortfolioStore } from '../../data/portfolio.store';
                   @if (item.degree) {
                     <p class="muted">{{ item.degree }}</p>
                   }
+                  @if (item.description) {
+                    <p class="muted">{{ item.description }}</p>
+                  }
                 </div>
                 <div class="status">
                   <span class="badge" [class.badge-live]="item.status === 'IN_PROGRESS'">

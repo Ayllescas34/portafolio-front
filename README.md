@@ -1,11 +1,76 @@
-# Frontend — Angular
+# Portafolio profesional: sitio web
 
-Sitio público, hoja de vida imprimible y panel `/admin`. Ver el [README principal](../README.md)
-y el [manual](../docs/MANUAL.md).
+[![CI](https://github.com/Ayllescas34/portafolio-front/actions/workflows/ci.yml/badge.svg)](https://github.com/Ayllescas34/portafolio-front/actions/workflows/ci.yml)
 
-| Script | Uso |
+Sitio público, hoja de vida imprimible y panel administrativo del portafolio de Alejandro Flores
+Yllescas.
+
+La API, la base de datos y la documentación técnica están en
+[portafolio-backend](https://github.com/Ayllescas34/portafolio-backend).
+
+> **Estado:** funciona en entorno local. Todavía no está desplegado.
+
+## Stack
+
+| Área | Tecnología |
 |---|---|
-| `npm start` | http://localhost:4200 (proxy de `/api` hacia http://localhost:3000) |
-| `npm test -- --watch=false` | Pruebas unitarias (Chrome sin interfaz) |
-| `npm run e2e` | Pruebas end-to-end con Playwright (levanta API :3100 y sitio :4300) |
-| `npm run lint` / `npm run build` | Calidad / compilación de producción |
+| Aplicación | Angular 20 (componentes standalone y signals), TypeScript, SCSS |
+| 3D | Three.js con carga diferida, pausa fuera de pantalla, respeto de `prefers-reduced-motion` y alternativa SVG sin WebGL |
+| Panel | Recursos declarativos sobre páginas genéricas de listado y formulario |
+| Pruebas | Jasmine y Karma, Playwright (E2E) |
+
+## Estructura
+
+```
+├── src/app/core/     servicios, modelos, tema, SEO y textos
+├── src/app/shared/   componentes reutilizables
+├── src/app/public/   sitio público y hoja de vida
+├── src/app/admin/    panel administrativo
+└── e2e/              pruebas end-to-end y herramientas de captura
+```
+
+## Instalación
+
+Requisitos: Node.js 22, npm 10 y Google Chrome (para las pruebas).
+
+Clona este repositorio junto a la API, en la misma carpeta:
+
+```
+portafolio/
+├── backend/    portafolio-backend
+└── frontend/   portafolio-front
+```
+
+```bash
+npm install
+```
+
+Sigue la [guía de la API](https://github.com/Ayllescas34/portafolio-backend#instalación) para dejarla
+funcionando en http://localhost:3000.
+
+## Comandos
+
+| Comando | Uso |
+|---|---|
+| `npm start` | Sitio en http://localhost:4200 y panel en http://localhost:4200/admin |
+| `npm run test:ci` | Pruebas unitarias en Chrome sin interfaz |
+| `npm run e2e` | Pruebas E2E: levantan su propia API (3100) y su propio sitio (4300) |
+| `npm run lint` | Calidad de código |
+| `npm run build` | Compilación de producción |
+
+`ng serve` redirige `/api` y `/uploads` hacia la API (`proxy.conf.json`), así que el navegador solo
+habla con un origen.
+
+Las pruebas E2E buscan la API en `../backend`. Si está en otra carpeta, indícala en `BACKEND_DIR`.
+
+## Flujo de trabajo
+
+- `main` siempre debe estar estable.
+- Cada cambio se trabaja en una rama `feat/...` o `fix/...` y entra por pull request.
+- La integración continua ejecuta lint, pruebas unitarias, compilación y pruebas E2E en cada push a
+  `main` y en cada pull request.
+
+## Problemas conocidos
+
+- El script de `index.html` que aplica el tema antes de cargar Angular necesitará un hash CSP cuando
+  se configure producción.

@@ -16,6 +16,7 @@ test.describe('Portafolio público', () => {
     }
     // The phone stays hidden until the owner chooses to publish it.
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+    await expect(page.locator('#formacion')).toContainText('Finalizando el cuarto semestre.');
   });
 
   test('publica metadatos y datos estructurados Person', async ({ page }) => {
