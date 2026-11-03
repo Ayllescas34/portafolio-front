@@ -57,6 +57,8 @@ const SOCIAL_ICONS: Record<string, IconName> = { GITHUB: 'github', LINKEDIN: 'li
   `,
   styles: `
     main { outline: none; }
+    /* Keeps the footer below the fold until the content arrives, so it never jumps. */
+    @media screen { main { min-height: calc(100dvh - var(--header-h)); } }
     .to-top { position: fixed; right: clamp(1rem, 3vw, 2.5rem); bottom: 1.5rem; z-index: 40; display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--accent-2); box-shadow: var(--shadow); cursor: pointer; transition: border-color var(--dur) var(--ease); }
     .to-top:hover { border-color: var(--accent-2); }
     .footer { border-top: 1px solid var(--border); background: var(--bg-elevated); padding-block: 2.5rem 1.5rem; }
