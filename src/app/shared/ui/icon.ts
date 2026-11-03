@@ -44,6 +44,11 @@ const ICONS = {
   grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   tag: 'M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM7.5 7.5h.01',
   upload: 'M12 16V5M7 10l5-5 5 5M5 20h14',
+  monitor: 'M3 5h18v12H3zM9 21h6M12 17v4',
+  server: 'M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01',
+  shield: 'M12 3l8 3v6c0 4.6-3.2 7.7-8 9-4.8-1.3-8-4.4-8-9V6zM8.5 12l2.5 2.5 4.5-4.5',
+  rocket: 'M5 15c-1.5 1.3-2 3.5-2 6 2.5 0 4.700-.5 6-2M9 15l-3-3c1.5-4 5-9 15-9 0 10-5 13.500-9 15zM15 10.500h.01',
+  puzzle: 'M9 4a2 2 0 1 1 4 0v2h5v5h2a2 2 0 1 1 0 4h-2v5h-5v-2a2 2 0 1 0-4 0v2H4v-5h2a2 2 0 1 0 0-4H4V6h5z',
 } as const;
 
 export type IconName = keyof typeof ICONS;

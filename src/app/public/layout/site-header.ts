@@ -12,19 +12,15 @@ import { SectionId, SectionSpyService } from './section-spy.service';
   selector: 'app-site-header',
   imports: [RouterLink, IconComponent],
   template: `
-    <header class="header" [class.scrolled]="scrolled()">
-      <div class="container bar">
-        <a class="brand" routerLink="/" fragment="inicio" (click)="close()">
-          <span class="brand-mark" aria-hidden="true">{{ initials() }}</span>
-          <span class="brand-text">
-            <span class="brand-name">{{ name() }}</span>
-            <span class="brand-role">{{ role() }}</span>
-          </span>
+    <header class="header force-dark" [class.scrolled]="scrolled()" [class.overlay]="overlay()">
+      <div class="bar">
+        <a class="brand" routerLink="/" fragment="inicio" [attr.aria-label]="name()" (click)="close()">
+          <span class="logo" aria-hidden="true">{{ logo() }}<span class="dot">.</span><span class="cursor">_</span></span>
         </a>
 
         <nav [attr.aria-label]="t().nav.main" class="nav" [class.open]="open()" id="site-nav">
           <ul>
-            @for (link of links(); track link.id) {
+            @for (link of links(); track link.id; let i = $index) {
               <li>
                 <a
                   routerLink="/"
@@ -32,8 +28,11 @@ import { SectionId, SectionSpyService } from './section-spy.service';
                   [class.active]="spy.active() === link.id"
                   [attr.aria-current]="spy.active() === link.id ? 'location' : null"
                   (click)="close()"
-                  >{{ link.label }}</a
                 >
+                  <span class="slashes" aria-hidden="true">//</span>
+                  {{ link.label }}
+                  <sup aria-hidden="true">{{ number(i) }}</sup>
+                </a>
               </li>
             }
           </ul>
@@ -43,6 +42,9 @@ import { SectionId, SectionSpyService } from './section-spy.service';
         </nav>
 
         <div class="actions">
+          <a class="btn btn-sm resume" routerLink="/cv" (click)="close()">
+            <app-icon name="printer" [size]="16" />{{ t().nav.resume }}
+          </a>
           <button
             type="button"
             class="btn btn-ghost btn-icon"
@@ -74,22 +76,20 @@ export class SiteHeaderComponent {
   protected readonly spy = inject(SectionSpyService);
   private readonly store = inject(PortfolioStore);
   private readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
   private readonly toggleButton = viewChild<ElementRef<HTMLButtonElement>>('toggleButton');
   protected readonly t = this.i18n.t;
 
   readonly open = signal(false);
   readonly scrolled = signal(false);
+  private readonly isHome = signal(this.onHome());
+
+  /** Transparent only while it sits on top of the hero. */
+  protected readonly overlay = computed(() => this.isHome() && !this.scrolled() && !this.open());
 
   protected readonly name = computed(() => this.store.profile()?.fullName ?? '');
-  protected readonly role = computed(() => this.store.profile()?.professionalTitle ?? '');
-  protected readonly initials = computed(() =>
-    this.name()
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join(''),
-  );
+  /** "Alejandro Flores Yllescas" -> "AlejandroFlores" */
+  protected readonly logo = computed(() => this.name().split(/\s+/).slice(0, 2).join(''));
 
   protected readonly links = computed(() => {
     const nav = this.t().nav;
@@ -110,13 +110,19 @@ export class SiteHeaderComponent {
   });
 
   constructor() {
-    // Close the mobile menu on every navigation.
-    inject(Router)
-      .events.pipe(
+    this.router.events
+      .pipe(
         filter((e) => e instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => this.open.set(false));
+      .subscribe(() => {
+        this.open.set(false); // close the mobile menu on every navigation
+        this.isHome.set(this.onHome());
+      });
+  }
+
+  protected number(index: number): string {
+    return String(index + 1).padStart(2, '0');
   }
 
   @HostListener('window:scroll')
@@ -133,5 +139,9 @@ export class SiteHeaderComponent {
 
   close(): void {
     this.open.set(false);
+  }
+
+  private onHome(): boolean {
+    return this.router.url.split(/[?#]/)[0] === '/';
   }
 }

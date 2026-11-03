@@ -1,25 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { MotionService } from '../../core/ui/motion.service';
-import { HeroSceneComponent, NETWORK_SCENE_LOADER, SCENE_VIEWPORT, WEBGL_SUPPORT } from './hero-scene';
+import { HeroSceneComponent, NETWORK_SCENE_LOADER, SCENE_COMPACT, WEBGL_SUPPORT } from './hero-scene';
 import type { NetworkScene, SceneOptions } from './network-scene';
 
 describe('HeroSceneComponent', () => {
   let scene: jasmine.SpyObj<NetworkScene>;
   let factory: jasmine.Spy<(el: HTMLElement, options: SceneOptions) => NetworkScene>;
 
-  function create(options: { webgl: boolean; reduced: boolean; desktop?: boolean }) {
-    scene = jasmine.createSpyObj<NetworkScene>('scene', ['setActive', 'setReducedMotion', 'setPalette', 'resize', 'dispose']);
+  function create(options: { webgl: boolean; reduced: boolean; compact?: boolean }) {
+    scene = jasmine.createSpyObj<NetworkScene>('scene', ['setActive', 'setReducedMotion', 'resize', 'dispose']);
     factory = jasmine.createSpy('factory').and.returnValue(scene);
-    const viewport = {
-      matches: options.desktop ?? true,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-    } as unknown as MediaQueryList;
     TestBed.configureTestingModule({
       providers: [
         { provide: WEBGL_SUPPORT, useValue: () => options.webgl },
         { provide: NETWORK_SCENE_LOADER, useValue: () => Promise.resolve(factory) },
-        { provide: SCENE_VIEWPORT, useValue: viewport },
+        { provide: SCENE_COMPACT, useValue: () => options.compact ?? false },
       ],
     });
     TestBed.inject(MotionService).reduced.set(options.reduced);
@@ -45,11 +40,10 @@ describe('HeroSceneComponent', () => {
     expect(factory.calls.mostRecent().args[1].reducedMotion).toBeTrue();
   });
 
-  it('does not create a WebGL context on small screens', async () => {
-    const fixture = create({ webgl: true, reduced: false, desktop: false });
+  it('requests the lighter scene on small screens', async () => {
+    const fixture = create({ webgl: true, reduced: false, compact: true });
     await fixture.whenStable();
-    expect(fixture.componentInstance.mode()).toBe('off');
-    expect(factory).not.toHaveBeenCalled();
+    expect(factory.calls.mostRecent().args[1].compact).toBeTrue();
   });
 
   it('is decorative for assistive technology', async () => {

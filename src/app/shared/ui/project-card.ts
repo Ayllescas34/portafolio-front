@@ -23,53 +23,75 @@ export type ProjectCardData = Pick<
   imports: [RouterLink, IconComponent],
   template: `
     @let p = project();
-    <article class="project" [class.featured]="variant() === 'featured'" [class.with-media]="!!p.coverImageUrl">
-      @if (p.coverImageUrl) {
-        <div class="media">
-          <img [src]="p.coverImageUrl" [alt]="p.coverImageAlt ?? ''" loading="lazy" decoding="async" width="640" height="360" />
-        </div>
-      }
-      <div class="content">
-        <div class="tags">
-          <span class="kind"><app-icon [name]="icon()" [size]="15" />{{ t().enums.projectKind[p.kind] }}</span>
-          <span class="status">{{ t().enums.projectStatus[p.status] }}</span>
-        </div>
-        <h3>
-          @if (linkable()) {
-            <a class="stretched" [routerLink]="['/proyectos', p.slug]">{{ p.title }}</a>
-          } @else {
-            {{ p.title }}
-          }
-        </h3>
-        <p class="description">{{ p.shortDescription }}</p>
-
-        @if (variant() === 'featured') {
-          <dl class="facts">
-            @if (p.context) {
-              <div><dt>{{ t().projects.context }}</dt><dd>{{ p.context }}</dd></div>
+    @if (variant() === 'featured') {
+      <article class="featured">
+        <div class="lead-col">
+          <p class="kind"><app-icon [name]="icon()" [size]="15" />{{ t().enums.projectKind[p.kind] }} · {{ t().enums.projectStatus[p.status] }}</p>
+          <h3>
+            @if (linkable()) {
+              <a [routerLink]="['/proyectos', p.slug]">{{ p.title }}</a>
+            } @else {
+              {{ p.title }}
             }
-            @if (p.solution) {
-              <div><dt>{{ t().projects.solution }}</dt><dd>{{ p.solution }}</dd></div>
-            }
-            @if (participation().length) {
-              <div>
-                <dt>{{ t().projects.participation }}</dt>
-                <dd>
-                  <ul class="participation">
-                    @for (line of participation(); track $index) {
-                      <li>{{ line }}</li>
-                    }
-                  </ul>
-                </dd>
-              </div>
-            }
-          </dl>
-        }
-
-        <div class="footer">
+          </h3>
+          <p class="description">{{ p.shortDescription }}</p>
           @if (p.role) {
             <p class="role"><span>{{ t().projects.role }}:</span> {{ p.role }}</p>
           }
+          <ul class="tech" [attr.aria-label]="t().projects.technologies">
+            @for (tech of p.technologies; track tech.slug) {
+              <li>{{ tech.name }}</li>
+            }
+          </ul>
+          @if (linkable()) {
+            <a class="btn btn-primary" [routerLink]="['/proyectos', p.slug]" [attr.aria-label]="t().projects.details + ': ' + p.title">
+              {{ t().projects.details }}<app-icon name="arrow-right" />
+            </a>
+          }
+        </div>
+        <dl class="facts">
+          @if (p.context) {
+            <div><dt>{{ t().projects.context }}</dt><dd>{{ p.context }}</dd></div>
+          }
+          @if (p.solution) {
+            <div><dt>{{ t().projects.solution }}</dt><dd>{{ p.solution }}</dd></div>
+          }
+          @if (participation().length) {
+            <div>
+              <dt>{{ t().projects.participation }}</dt>
+              <dd>
+                <ul class="participation">
+                  @for (line of participation(); track $index) {
+                    <li>{{ line }}</li>
+                  }
+                </ul>
+              </dd>
+            </div>
+          }
+        </dl>
+      </article>
+    } @else {
+      <article class="project">
+        <div class="media" [class.professional]="p.kind === 'PROFESSIONAL'">
+          @if (p.coverImageUrl) {
+            <img [src]="p.coverImageUrl" [alt]="p.coverImageAlt ?? ''" loading="lazy" decoding="async" width="640" height="360" />
+          } @else {
+            <div class="generated" aria-hidden="true">
+              <app-icon [name]="icon()" [size]="34" />
+              <span class="path">/{{ p.slug }}</span>
+            </div>
+          }
+        </div>
+        <div class="content">
+          <h3>
+            @if (linkable()) {
+              <a class="stretched" [routerLink]="['/proyectos', p.slug]">{{ p.title }}</a>
+            } @else {
+              {{ p.title }}
+            }
+          </h3>
+          <p class="kind">{{ t().enums.projectKind[p.kind] }} · {{ t().enums.projectStatus[p.status] }}</p>
+          <p class="description">{{ p.shortDescription }}</p>
           <ul class="tech" [attr.aria-label]="t().projects.technologies">
             @for (tech of visibleTech(); track tech.slug) {
               <li>{{ tech.name }}</li>
@@ -78,12 +100,9 @@ export type ProjectCardData = Pick<
               <li>+{{ hiddenTech() }}</li>
             }
           </ul>
-          @if (linkable()) {
-            <span class="more" aria-hidden="true">{{ t().projects.details }} <app-icon name="arrow-right" [size]="16" /></span>
-          }
         </div>
-      </div>
-    </article>
+      </article>
+    }
   `,
   styleUrl: './project-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,9 +113,8 @@ export class ProjectCardComponent {
   readonly linkable = input(true);
   protected readonly t = inject(I18nService).t;
 
-  private readonly limit = computed(() => (this.variant() === 'featured' ? 10 : 5));
-  protected readonly visibleTech = computed(() => this.project().technologies.slice(0, this.limit()));
-  protected readonly hiddenTech = computed(() => Math.max(0, this.project().technologies.length - this.limit()));
+  protected readonly visibleTech = computed(() => this.project().technologies.slice(0, 5));
+  protected readonly hiddenTech = computed(() => Math.max(0, this.project().technologies.length - 5));
   protected readonly participation = computed(() => (this.project().responsibilities ?? []).slice(0, 5));
   protected readonly icon = computed(() => KIND_ICON[this.project().kind]);
 }

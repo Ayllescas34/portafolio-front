@@ -9,7 +9,7 @@ const browser = await chromium.launch({ channel: 'chrome', args: ['--enable-unsa
 const context = await browser.newContext({ viewport: { width: +width, height: +height }, colorScheme: theme });
 const page = await context.newPage();
 await page.addInitScript((t) => localStorage.setItem('portfolio.theme', t), theme);
-await page.goto('http://localhost:4200' + path, { waitUntil: 'networkidle' });
+await page.goto((process.env.BASE_URL ?? 'http://localhost:4200') + path, { waitUntil: 'networkidle' });
 await page.evaluate(() => document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-visible')));
 if (selector) await page.locator(selector).first().scrollIntoViewIfNeeded();
 await page.waitForTimeout(1500);

@@ -33,13 +33,35 @@ test.describe('Portafolio público', () => {
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /\.NET 8/);
   });
 
-  test('la escena 3D se muestra en escritorio como acento, sin tapar el texto', async ({ page }) => {
+  test('la escena 3D es un fondo decorativo que no interfiere con el contenido', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    await expect(page.locator('app-hero-scene .scene')).toHaveAttribute('data-mode', /webgl|fallback/);
-    const copy = await page.locator('.hero-copy').boundingBox();
-    const visual = await page.locator('.hero-visual').boundingBox();
-    expect(copy && visual && copy.x + copy.width <= visual.x).toBeTruthy();
+    const scene = page.locator('app-hero-scene .scene');
+    await expect(scene).toHaveAttribute('data-mode', /webgl|fallback/);
+    await expect(scene).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('app-hero-scene')).toHaveCSS('pointer-events', 'none');
+    // The primary action stays clickable on top of the scene.
+    await page.getByRole('link', { name: 'Ver experiencia' }).click();
+    await expect(page).toHaveURL(/#experiencia$/);
+  });
+
+  test('la experiencia es un acordeón con el puesto actual abierto', async ({ page }) => {
+    await page.goto('/#experiencia');
+    const items = page.locator('#experiencia details');
+    await expect(items).toHaveCount(4);
+    await expect(items.nth(0)).toHaveAttribute('open', '');
+    await expect(items.nth(1)).not.toHaveAttribute('open', '');
+    await items.nth(1).locator('summary').click();
+    await expect(items.nth(1).getByText('Gestión y diseño de bases de datos')).toBeVisible();
+  });
+
+  test('el botón de volver arriba aparece al desplazarse', async ({ page }) => {
+    await page.goto('/');
+    const button = page.getByRole('button', { name: 'Volver arriba' });
+    await expect(button).toHaveCount(0);
+    await page.evaluate(() => window.scrollTo({ top: 1500, behavior: 'instant' }));
+    await button.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(50);
   });
 
   test('la navegación lleva a cada sección y la marca como activa', async ({ page }) => {

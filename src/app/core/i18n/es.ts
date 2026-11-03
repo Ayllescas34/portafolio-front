@@ -31,8 +31,8 @@ export const es = {
     based: 'Ubicación',
     email: 'Correo',
     stack: 'Tecnologías principales',
-    visualLegend: 'Capas de una solución',
-    layers: ['Interfaz', 'Servicios', 'Datos', 'Pruebas', 'Despliegue'],
+    scroll: 'Ir al perfil',
+    backToTop: 'Volver arriba',
   },
   about: {
     eyebrow: 'Perfil',
@@ -68,6 +68,7 @@ export const es = {
     lead: 'Casos profesionales descritos sin información confidencial, junto con proyectos personales.',
     featured: 'Caso destacado',
     all: 'Todos',
+    filterBy: 'Filtrar por',
     filterByKind: 'Filtrar por tipo',
     filterByTech: 'Filtrar por tecnología',
     clear: 'Quitar filtros',

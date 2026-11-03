@@ -42,8 +42,9 @@ const KINDS: ProjectKind[] = ['PROFESSIONAL', 'PERSONAL', 'ACADEMIC', 'DEMO'];
           <div class="toolbar">
             @if (filterOptions().kinds.length > 1) {
               <div class="filters" role="group" [attr.aria-label]="t().projects.filterByKind">
+                <span class="filter-label" aria-hidden="true">{{ t().projects.filterBy }}</span>
                 <button type="button" class="filter" [attr.aria-pressed]="!kind()" (click)="setKind(null)">
-                  {{ t().projects.all }}
+                  {{ t().projects.all }} <sup class="count">{{ allProjects().length }}</sup>
                 </button>
                 @for (option of kindOptions(); track option.value) {
                   <button
@@ -52,7 +53,7 @@ const KINDS: ProjectKind[] = ['PROFESSIONAL', 'PERSONAL', 'ACADEMIC', 'DEMO'];
                     [attr.aria-pressed]="kind() === option.value"
                     (click)="setKind(option.value)"
                   >
-                    {{ t().enums.projectKind[option.value] }} <span class="count">{{ option.count }}</span>
+                    {{ t().enums.projectKind[option.value] }} <sup class="count">{{ option.count }}</sup>
                   </button>
                 }
               </div>

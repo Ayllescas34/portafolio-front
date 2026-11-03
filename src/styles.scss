@@ -1,77 +1,95 @@
 /* ==========================================================================
-   Design tokens — executive system
-   Navy / graphite base, neutral surfaces, one restrained blue accent and a
-   moderate teal for secondary signals. Contrast (WCAG AA+):
-   text/bg ≥ 13:1, muted/bg ≥ 7:1, accent text/bg ≥ 4.5:1 in both themes.
+   Design tokens — tech-executive system
+   Charcoal base with two disciplined accents (cyan for navigation and data,
+   violet for actions) and a warm light reserved for the hero scene.
+   Contrast (WCAG AA+): text/bg ≥ 13:1, muted/bg ≥ 8:1, accents/bg ≥ 5:1.
+   `.force-dark` keeps the header and hero dark in both themes.
    ========================================================================== */
 
 :root,
-:root[data-theme='dark'] {
+:root[data-theme='dark'],
+.force-dark {
   color-scheme: dark;
-  --bg: #0b1220;
-  --bg-elevated: #0f1829;
-  --surface: #121c2f;
-  --surface-2: #17233a;
-  --surface-hover: #1c2a45;
-  --border: #22314d;
-  --border-strong: #31446a;
-  --text: #e8edf5;
-  --text-muted: #a9b6cc;
-  --text-faint: #8392ab;
-  --accent: #6ea8fe;
-  --accent-strong: #8dbbff;
-  --accent-contrast: #081121;
-  --accent-soft: rgb(110 168 254 / 0.12);
-  --accent-2: #4fb6c2;
-  --accent-2-soft: rgb(79 182 194 / 0.12);
+  --bg: #1a191d;
+  --bg-elevated: #1f1e23;
+  --surface: #212025;
+  --surface-2: #2a2930;
+  --surface-hover: #32313a;
+  --border: #38373f;
+  --border-strong: #5a5964;
+  --text: #f5f5f7;
+  --text-muted: #c2c1ca;
+  --text-faint: #9a99a5;
+  --accent: #66d9ed;
+  --accent-strong: #93e7f6;
+  --accent-contrast: #0c2a31;
+  --accent-soft: rgb(102 217 237 / 0.12);
+  --accent-2: #bb77ff;
+  --accent-2-soft: rgb(187 119 255 / 0.14);
+  --cta: #7a2be2;
+  --cta-hover: #8c46ec;
+  --cta-contrast: #ffffff;
+  --bar: #3e1278;
+  --bar-hover: #4d1a92;
   --success: #5ccf8f;
   --danger: #f2788a;
   --danger-soft: rgb(242 120 138 / 0.12);
   --warning: #e8b45a;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 12px 28px -18px rgb(0 0 0 / 0.6);
-  --band: #0e1726;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 28px -18px rgb(0 0 0 / 0.7);
+  --band: #161519;
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f6f7f9;
+  --bg: #f6f6f9;
   --bg-elevated: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f0f3f7;
-  --surface-hover: #e8edf3;
-  --border: #dfe4ec;
-  --border-strong: #c5cedb;
-  --text: #0f1b2d;
-  --text-muted: #3f4c61;
-  --text-faint: #5b677a;
-  --accent: #1f5fbf;
-  --accent-strong: #184c99;
+  --surface-2: #eeeef3;
+  --surface-hover: #e6e6ee;
+  --border: #dedde6;
+  --border-strong: #b9b8c6;
+  --text: #17161b;
+  --text-muted: #44434f;
+  --text-faint: #5c5b69;
+  --accent: #0b7285;
+  --accent-strong: #095c6b;
   --accent-contrast: #ffffff;
-  --accent-soft: rgb(31 95 191 / 0.08);
-  --accent-2: #0f7681;
-  --accent-2-soft: rgb(15 118 129 / 0.08);
+  --accent-soft: rgb(11 114 133 / 0.09);
+  --accent-2: #6d28d9;
+  --accent-2-soft: rgb(109 40 217 / 0.08);
+  --cta: #6d28d9;
+  --cta-hover: #5b21b6;
+  --cta-contrast: #ffffff;
+  --bar: #4c1d95;
+  --bar-hover: #5b21b6;
   --success: #1c7c46;
   --danger: #b4233a;
   --danger-soft: rgb(180 35 58 / 0.07);
   --warning: #9a5b0b;
-  --shadow: 0 1px 2px rgb(15 27 45 / 0.05), 0 10px 24px -18px rgb(15 27 45 / 0.25);
-  --band: #eef1f5;
+  --shadow: 0 1px 2px rgb(23 22 27 / 0.05), 0 10px 24px -18px rgb(23 22 27 / 0.25);
+  --band: #eeeef3;
+}
+
+/* Tokens resolve per element: re-apply the text color inside forced-dark areas. */
+.force-dark {
+  color: var(--text);
 }
 
 :root {
   --font-sans: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --font-heading: 'Poppins', 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 10px;
   --container: 1180px;
   --measure: 68ch;
   --gutter: clamp(1rem, 4vw, 2rem);
-  --header-h: 64px;
+  --header-h: 68px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --dur: 160ms;
-  --dur-slow: 360ms;
+  --dur-slow: 420ms;
 }
 
 /* ========================================================================== Base */
@@ -106,8 +124,8 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-sans);
-  font-weight: 650;
+  font-family: var(--font-heading);
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.015em;
   margin: 0 0 0.5em;
@@ -220,41 +238,38 @@ kbd,
 }
 
 .section-header {
-  max-width: 760px;
-  margin-bottom: clamp(2rem, 5vw, 3rem);
+  max-width: 820px;
+  margin-inline: auto;
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  text-align: center;
 }
 
-/* Small, letter-spaced label above a section title (no terminal styling). */
+/* Code-comment label above a section title: the site's tech signature. */
 .eyebrow {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.85rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-transform: lowercase;
   color: var(--accent);
 }
 
 .eyebrow::before {
-  content: '';
-  width: 1.25rem;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
+  content: '// ';
+  color: var(--accent-2);
 }
 
 .section-title {
-  font-size: clamp(1.75rem, 3.4vw, 2.4rem);
-  letter-spacing: -0.02em;
+  font-size: clamp(2.2rem, 5.2vw, 3.8rem);
+  letter-spacing: -0.025em;
 }
 
 .lead {
   font-size: clamp(1.04rem, 1.5vw, 1.12rem);
   color: var(--text-muted);
   max-width: var(--measure);
+  margin-inline: auto;
 }
 
 .muted {
@@ -277,8 +292,9 @@ kbd,
   border-radius: var(--radius-sm);
   background: var(--btn-bg);
   color: var(--btn-fg);
+  font-family: var(--font-mono);
   font-weight: 600;
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -307,13 +323,13 @@ kbd,
 }
 
 .btn-primary {
-  --btn-bg: var(--accent);
-  --btn-fg: var(--accent-contrast);
-  --btn-border: var(--accent);
+  --btn-bg: var(--cta);
+  --btn-fg: var(--cta-contrast);
+  --btn-border: var(--cta);
 
   &:hover {
-    --btn-bg: var(--accent-strong);
-    --btn-border: var(--accent-strong);
+    --btn-bg: var(--cta-hover);
+    --btn-border: var(--cta-hover);
   }
 }
 
@@ -344,11 +360,12 @@ kbd,
   align-items: center;
   gap: 0.35rem;
   padding: 0.18rem 0.6rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.5;
   white-space: nowrap;
@@ -382,11 +399,11 @@ kbd,
   gap: 0.4rem;
   padding: 0.12rem 0.5rem;
   border-radius: var(--radius-sm);
-  background: var(--accent-2-soft);
-  color: var(--accent-2);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
   font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
 .badge-live::before {

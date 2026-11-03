@@ -4,77 +4,75 @@ import { formatDuration, PeriodPipe } from '../../../shared/pipes/period';
 import { RevealDirective } from '../../../shared/ui/reveal.directive';
 import { PortfolioStore } from '../../data/portfolio.store';
 
+/** Accordion built on native <details>: keyboard and screen-reader support included. */
 @Component({
   selector: 'app-experience-section',
   imports: [PeriodPipe, RevealDirective],
   template: `
     <section id="experiencia" class="section section-band" aria-labelledby="experience-title">
-      <div class="container">
+      <div class="container narrow">
         <header class="section-header" appReveal>
           <p class="eyebrow">{{ t().experience.eyebrow }}</p>
           <h2 id="experience-title" class="section-title">{{ t().experience.title }}</h2>
         </header>
 
         @if (items().length) {
-          <ol class="timeline">
+          <ol class="accordion">
             @for (item of items(); track item.id) {
-              <li class="entry" [class.current]="item.isCurrent" appReveal>
-                <div class="when">
-                  <span class="period tabular">{{ item | period }}</span>
-                  <span class="duration">{{ item.duration }}</span>
-                </div>
-                <article class="body">
-                  <div class="title-row">
-                    <h3>{{ item.position }}</h3>
-                    @if (item.isCurrent) {
-                      <span class="badge badge-live">{{ t().experience.current }}</span>
-                    }
-                  </div>
-                  <p class="company">
-                    {{ item.company }}
-                    @if (item.location) {
-                      <span> · {{ item.location }}</span>
-                    }
-                  </p>
-                  @if (item.employmentType || item.workMode) {
-                    <ul class="chip-list meta">
+              <li appReveal>
+                <details [open]="item.isCurrent">
+                  <summary>
+                    <span class="title">
+                      {{ item.position }} <span class="at">&#64;</span> {{ item.company }}
+                      @if (item.isCurrent) {
+                        <span class="current">{{ t().experience.current }}</span>
+                      }
+                    </span>
+                    <span class="period">{{ item | period }}</span>
+                    <span class="toggle" aria-hidden="true"></span>
+                  </summary>
+                  <article class="panel">
+                    <p class="meta">
+                      <span>{{ item.duration }}</span>
+                      @if (item.location) {
+                        <span>{{ item.location }}</span>
+                      }
                       @if (item.employmentType) {
-                        <li class="chip">{{ t().enums.employmentType[item.employmentType] }}</li>
+                        <span>{{ t().enums.employmentType[item.employmentType] }}</span>
                       }
                       @if (item.workMode) {
-                        <li class="chip">{{ t().enums.workMode[item.workMode] }}</li>
+                        <span>{{ t().enums.workMode[item.workMode] }}</span>
                       }
-                    </ul>
-                  }
-
-                  @if (item.summary) {
-                    <p class="summary">{{ item.summary }}</p>
-                  }
-                  @if (item.responsibilities.length) {
-                    <h4 class="label">{{ t().experience.responsibilities }}</h4>
-                    <ul class="bullets" [class.single]="item.responsibilities.length < 4">
-                      @for (line of item.responsibilities; track $index) {
-                        <li>{{ line }}</li>
-                      }
-                    </ul>
-                  }
-                  @if (item.achievements.length) {
-                    <h4 class="label">{{ t().experience.achievements }}</h4>
-                    <ul class="bullets single">
-                      @for (line of item.achievements; track $index) {
-                        <li>{{ line }}</li>
-                      }
-                    </ul>
-                  }
-                  @if (item.technologies.length) {
-                    <h4 class="visually-hidden">{{ t().experience.technologies }}</h4>
-                    <ul class="chip-list">
-                      @for (tech of item.technologies; track tech.id) {
-                        <li class="chip">{{ tech.name }}</li>
-                      }
-                    </ul>
-                  }
-                </article>
+                    </p>
+                    @if (item.summary) {
+                      <p class="summary">{{ item.summary }}</p>
+                    }
+                    @if (item.responsibilities.length) {
+                      <h3 class="label">{{ t().experience.responsibilities }}</h3>
+                      <ul class="bullets">
+                        @for (line of item.responsibilities; track $index) {
+                          <li>{{ line }}</li>
+                        }
+                      </ul>
+                    }
+                    @if (item.achievements.length) {
+                      <h3 class="label">{{ t().experience.achievements }}</h3>
+                      <ul class="bullets">
+                        @for (line of item.achievements; track $index) {
+                          <li>{{ line }}</li>
+                        }
+                      </ul>
+                    }
+                    @if (item.technologies.length) {
+                      <h3 class="visually-hidden">{{ t().experience.technologies }}</h3>
+                      <ul class="chip-list">
+                        @for (tech of item.technologies; track tech.id) {
+                          <li class="chip">{{ tech.name }}</li>
+                        }
+                      </ul>
+                    }
+                  </article>
+                </details>
               </li>
             }
           </ol>

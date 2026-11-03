@@ -11,44 +11,31 @@ import { HeroSceneComponent } from '../../hero-scene/hero-scene';
   imports: [RouterLink, IconComponent, HeroSceneComponent],
   template: `
     @if (profile(); as profile) {
-      <section id="inicio" class="hero" aria-labelledby="hero-title">
-        <div class="container hero-grid">
-          <div class="hero-copy">
-            <h1 id="hero-title">{{ profile.fullName }}</h1>
-            <p class="role">{{ profile.professionalTitle }}</p>
-            <p class="statement">{{ profile.shortBio }}</p>
-            @if (profile.tagline) {
-              <p class="tagline">{{ profile.tagline }}</p>
-            }
+      <section id="inicio" class="hero force-dark" aria-labelledby="hero-title">
+        <app-hero-scene />
+        <div class="veil" aria-hidden="true"></div>
 
-            <div class="cta">
-              <a class="btn btn-primary" routerLink="/" fragment="experiencia">
-                {{ t().hero.viewExperience }}<app-icon name="arrow-right" />
+        <div class="container hero-content">
+          <h1 id="hero-title">{{ profile.fullName }}</h1>
+          <p class="role">{{ profile.professionalTitle }}</p>
+          <p class="statement">{{ profile.shortBio }}</p>
+          @if (profile.tagline) {
+            <p class="tagline">{{ profile.tagline }}</p>
+          }
+
+          <div class="cta">
+            <a class="btn btn-primary" routerLink="/" fragment="experiencia">
+              {{ t().hero.viewExperience }}<app-icon name="arrow-right" />
+            </a>
+            <a class="btn" routerLink="/" fragment="proyectos">{{ t().hero.viewProjects }}</a>
+            <a class="btn btn-ghost" routerLink="/" fragment="contacto"><app-icon name="mail" />{{ t().hero.contact }}</a>
+            @if (profile.cvFileUrl) {
+              <a class="btn btn-ghost" [href]="profile.cvFileUrl" download>
+                <app-icon name="download" />{{ t().hero.downloadCv }}
               </a>
-              <a class="btn" routerLink="/" fragment="proyectos">{{ t().hero.viewProjects }}</a>
-              <a class="btn btn-ghost" routerLink="/" fragment="contacto"><app-icon name="mail" />{{ t().hero.contact }}</a>
-              @if (profile.cvFileUrl) {
-                <a class="btn btn-ghost" [href]="profile.cvFileUrl" download>
-                  <app-icon name="download" />{{ t().hero.downloadCv }}
-                </a>
-              }
-            </div>
+            }
           </div>
 
-          <figure class="hero-visual" aria-hidden="true">
-            <app-hero-scene />
-            <figcaption class="legend">
-              <span class="legend-title">{{ t().hero.visualLegend }}</span>
-              <ol>
-                @for (layer of t().hero.layers; track layer) {
-                  <li>{{ layer }}</li>
-                }
-              </ol>
-            </figcaption>
-          </figure>
-        </div>
-
-        <div class="container">
           <dl class="facts" [attr.aria-label]="t().hero.summary">
             @if (current(); as current) {
               <div>
@@ -76,7 +63,7 @@ import { HeroSceneComponent } from '../../hero-scene/hero-scene';
             }
             @if (stack().length) {
               <div class="facts-stack">
-                <dt>{{ t().hero.stack }}</dt>
+                <dt class="visually-hidden">{{ t().hero.stack }}</dt>
                 <dd>
                   <ul class="stack">
                     @for (skill of stack(); track skill.id) {
@@ -87,6 +74,10 @@ import { HeroSceneComponent } from '../../hero-scene/hero-scene';
               </div>
             }
           </dl>
+
+          <a class="scroll" routerLink="/" fragment="perfil" [attr.aria-label]="t().hero.scroll">
+            <span class="mouse" aria-hidden="true"><span class="wheel"></span></span>
+          </a>
         </div>
       </section>
     }

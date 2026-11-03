@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/ui/theme.service';
@@ -48,10 +48,17 @@ const SOCIAL_ICONS: Record<string, IconName> = { GITHUB: 'github', LINKEDIN: 'li
         <span>{{ t().footer.builtWith }}</span>
       </div>
     </footer>
+    @if (showTop()) {
+      <button type="button" class="to-top no-print" [attr.aria-label]="t().hero.backToTop" (click)="backToTop()">
+        <app-icon name="arrow-up" [size]="22" />
+      </button>
+    }
     <app-toasts />
   `,
   styles: `
     main { outline: none; }
+    .to-top { position: fixed; right: clamp(1rem, 3vw, 2.5rem); bottom: 1.5rem; z-index: 40; display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--accent-2); box-shadow: var(--shadow); cursor: pointer; transition: border-color var(--dur) var(--ease); }
+    .to-top:hover { border-color: var(--accent-2); }
     .footer { border-top: 1px solid var(--border); background: var(--bg-elevated); padding-block: 2.5rem 1.5rem; }
     .footer-inner { display: flex; flex-wrap: wrap; gap: 1.5rem 3rem; justify-content: space-between; align-items: flex-start; }
     .footer-name { margin: 0; font-weight: 650; font-size: 1.05rem; }
@@ -69,6 +76,17 @@ export class PublicShellComponent {
   protected readonly profile = this.store.profile;
   protected readonly socialLinks = computed(() => this.store.portfolio()?.socialLinks ?? []);
   protected readonly year = new Date().getFullYear();
+  protected readonly showTop = signal(false);
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.showTop.set(window.scrollY > 600);
+  }
+
+  protected backToTop(): void {
+    window.scrollTo({ top: 0 });
+    document.getElementById('contenido')?.focus({ preventScroll: true });
+  }
 
   constructor() {
     void this.store.load();

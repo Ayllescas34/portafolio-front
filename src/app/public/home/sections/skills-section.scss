@@ -1,12 +1,10 @@
 /* Delivery flow — vertical by default (mobile, tablet), horizontal on wide screens. */
 .flow {
-  position: relative;
   display: grid;
   gap: 0;
-  margin: 0 0 clamp(3rem, 7vw, 4.5rem);
+  margin: 0 0 clamp(3.5rem, 8vw, 5.5rem);
   padding: 0;
   list-style: none;
-  counter-reset: none;
 }
 
 .stage {
@@ -49,11 +47,12 @@
   width: 2.25rem;
   height: 2.25rem;
   border: 2px solid var(--accent);
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--accent);
+  font-family: var(--font-mono);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (min-width: 1100px) {
@@ -93,86 +92,134 @@
   }
 }
 
-/* Skill areas */
+/* Areas: a single bordered grid, cells separated by lines. */
 .areas-header {
   max-width: 760px;
-  margin-bottom: 1.75rem;
+  margin: 0 auto 2rem;
+  text-align: center;
 }
 
 .subtitle {
   margin-bottom: 0.35rem;
-  font-size: 1.35rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
 .areas {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0 2.5rem;
+  gap: 2px;
+  border: 2px solid var(--border-strong);
+  background: var(--border-strong);
 }
 
 .area {
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--bg);
+  color: var(--text);
 
-  h4 {
-    margin-bottom: 0.35rem;
-    font-size: 1.05rem;
-  }
-}
+  // An odd last cell takes the whole row, so no empty cells remain.
+  &:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
 
-.area-description {
-  margin-bottom: 0.9rem;
-  color: var(--text-muted);
-  font-size: 0.92rem;
-}
-
-.skills {
-  display: grid;
-  gap: 0.35rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 0.5rem;
-    font-size: 0.95rem;
-  }
-
-  li::before {
-    content: '';
-    flex: none;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--border-strong);
-    transform: translateY(-2px);
-  }
-
-  .featured {
-    font-weight: 600;
-
-    &::before {
-      background: var(--accent);
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1.75rem;
     }
   }
 }
 
+.area-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  app-icon {
+    flex: none;
+    color: var(--text);
+  }
+
+  h4 {
+    margin: 0;
+    font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+}
+
+// Solid underline hugging the first word.
+.mark {
+  --mark: var(--accent);
+  background: linear-gradient(var(--mark), var(--mark)) 0 88% / 100% 0.14em no-repeat;
+}
+
+.area:nth-child(3n + 2) .mark {
+  --mark: var(--accent-2);
+}
+
+.area:nth-child(3n) .mark {
+  --mark: #f0935a;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+.area-body {
+  margin: 0.4rem 0 0.4rem 0.75rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border-strong);
+}
+
+.area-description {
+  margin-bottom: 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.94rem;
+}
+
+.skills {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+
+  li {
+    color: var(--text-muted);
+  }
+
+  .featured {
+    color: var(--accent);
+    font-weight: 600;
+  }
+}
+
 .skill-note {
-  font-size: 0.84rem;
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
   font-weight: 400;
   color: var(--text-faint);
-
-  &::before {
-    content: '— ';
-  }
 }
 
 @media (max-width: 1000px) {
   .areas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .area:last-child:nth-child(3n + 1) {
+    grid-column: auto;
+  }
+
+  .area:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }
 

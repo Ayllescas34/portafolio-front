@@ -1,128 +1,112 @@
+// Full-bleed hero: the fixed header sits on top of it, so it slides under it.
 .hero {
-  padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2.5rem, 5vw, 4rem);
-  border-bottom: 1px solid var(--border);
-}
-
-.hero-grid {
-  display: grid;
-  // minmax(0, …): columns never grow past the viewport on narrow screens.
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: clamp(2rem, 5vw, 4rem);
+  position: relative;
+  isolation: isolate;
+  display: flex;
   align-items: center;
+  min-height: 100dvh;
+  margin-top: calc(-1 * var(--header-h));
+  padding-block: calc(var(--header-h) + 1.5rem) 1.5rem;
+  overflow: hidden; // the 3D canvas never causes horizontal scroll
+  background:
+    radial-gradient(90% 70% at 50% 0%, #1a2a38 0%, transparent 70%),
+    radial-gradient(70% 45% at 50% 100%, #2b1f1a 0%, transparent 75%),
+    #15161b;
 }
 
-.hero-copy {
-  max-width: 660px;
+app-hero-scene {
+  z-index: -2;
+}
+
+// Keeps the copy legible over the scene and blends into the next section.
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60% 46% at 50% 48%, rgb(16 17 22 / 0.5), transparent 78%),
+    linear-gradient(to bottom, transparent 72%, var(--bg));
+}
+
+.hero-content {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  min-width: 0;
 }
 
 h1 {
-  margin-bottom: 0.25em;
-  font-size: clamp(2.4rem, 5.4vw, 3.6rem);
+  margin-bottom: 0.3em;
+  max-width: 15ch;
+  font-size: clamp(2.5rem, 6.8vw, 5.5rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
+  line-height: 1.06;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 28px rgb(0 0 0 / 0.45);
 }
 
 .role {
   margin-bottom: 1.25rem;
-  font-size: clamp(1.15rem, 2vw, 1.4rem);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--accent);
 }
 
+.statement,
+.tagline {
+  max-width: 66ch;
+  text-shadow: 0 1px 14px rgb(0 0 0 / 0.55);
+}
+
 .statement {
-  margin-bottom: 0.75rem;
-  font-size: clamp(1.05rem, 1.6vw, 1.18rem);
-  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  font-size: clamp(1rem, 1.5vw, 1.14rem);
   color: var(--text);
-  max-width: 58ch;
 }
 
 .tagline {
-  max-width: 58ch;
+  font-size: 0.96rem;
   color: var(--text-muted);
 }
 
 .cta {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.65rem;
-  margin-top: 1.75rem;
+  margin-top: 1.25rem;
 }
 
-/* Framed visual: an accent beside the copy, never behind it. */
-.hero-visual {
-  position: relative;
-  margin: 0;
-  aspect-ratio: 1 / 1;
-  max-height: 460px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.legend {
-  position: absolute;
-  left: 1rem;
-  right: 1rem;
-  bottom: 0.9rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.75rem;
-  font-size: 0.74rem;
-  color: var(--text-faint);
-
-  ol {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.7rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  li::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    margin-right: 0.35rem;
-    border-radius: 50%;
-    background: var(--accent);
-    vertical-align: 1px;
-  }
-}
-
-.legend-title {
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-/* Key facts for a quick read. Columns separated by rules, not boxes. */
+/* Recruiter summary: compact row with restrained labels. */
 .facts {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.25rem 2rem;
-  margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+  gap: 1rem 1.5rem;
+  width: 100%;
+  max-width: 980px;
+  margin: clamp(1.75rem, 4vh, 2.75rem) 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
 
   dt {
-    margin-bottom: 0.25rem;
-    font-size: 0.74rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    margin-bottom: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--text-faint);
   }
 
   dd {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-weight: 500;
-    line-height: 1.45;
+    line-height: 1.4;
     overflow-wrap: anywhere;
   }
 }
@@ -138,40 +122,68 @@ h1 {
 .stack {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 0;
+  justify-content: center;
+  gap: 0.25rem 1.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
 
-  li {
-    font-weight: 500;
+/* Scroll cue */
+.scroll {
+  display: block;
+  margin-top: clamp(1rem, 2.5vh, 1.5rem);
+  padding: 0.25rem;
+  color: var(--text);
+}
+
+.mouse {
+  display: block;
+  width: 24px;
+  height: 40px;
+  border: 1.5px solid currentColor;
+  border-radius: 12px;
+}
+
+.wheel {
+  display: block;
+  width: 2px;
+  height: 7px;
+  margin: 7px auto 0;
+  border-radius: 2px;
+  background: var(--accent-2);
+  animation: wheel 2.2s var(--ease) infinite;
+}
+
+@keyframes wheel {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px);
   }
-
-  li:not(:last-child)::after {
-    content: '·';
-    margin: 0 0.6rem;
-    color: var(--text-faint);
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
   .facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-// Mobile: the copy takes the whole screen; the 3D visual is not rendered.
-@media (max-width: 900px) {
-  .hero-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .hero-visual {
-    display: none;
-  }
-}
-
 @media (max-width: 480px) {
+  .hero {
+    min-height: auto;
+    padding-block: calc(var(--header-h) + 2.5rem) 1.5rem;
+  }
+
   .facts {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -179,11 +191,17 @@ h1 {
   .cta .btn {
     flex: 1 1 auto;
   }
+
+  .scroll {
+    display: none;
+  }
 }
 
 @media print {
-  .hero-visual,
-  .cta {
+  app-hero-scene,
+  .veil,
+  .cta,
+  .scroll {
     display: none;
   }
 }

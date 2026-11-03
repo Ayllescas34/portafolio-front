@@ -32,11 +32,11 @@ test.describe('Móvil', () => {
     });
   }
 
-  test('en el teléfono no se crea la escena 3D', async ({ page }) => {
+  test('el nombre y las acciones del hero caben en el teléfono', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.locator('.hero-visual')).toBeHidden();
-    await expect(page.locator('app-hero-scene canvas')).toHaveCount(0);
+    await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
+    await expect(page.getByRole('link', { name: 'Ver experiencia' })).toBeInViewport();
+    await expect(page.locator('app-hero-scene .scene')).toHaveAttribute('data-mode', /webgl|fallback/);
   });
 
   test('el flujo de etapas se apila en vertical', async ({ page }) => {

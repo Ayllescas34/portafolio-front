@@ -1,42 +1,51 @@
 .featured {
-  margin-bottom: 2.5rem;
+  margin-bottom: clamp(3rem, 7vw, 4.5rem);
 }
 
 .featured-label {
-  margin-bottom: 0.75rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-faint);
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  text-transform: lowercase;
+  color: var(--accent);
+
+  &::before {
+    content: '// ';
+    color: var(--accent-2);
+  }
 }
 
 .toolbar {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.25rem 1.1rem;
 }
 
-.filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 36px;
-  padding: 0.3rem 0.8rem;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+.filter-label {
   color: var(--text-muted);
-  font-size: 0.86rem;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+// Text filters, as in a code editor's tab bar.
+.filter {
+  position: relative;
+  padding: 0.35rem 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition:
-    background-color var(--dur) var(--ease),
     color var(--dur) var(--ease),
     border-color var(--dur) var(--ease);
 
@@ -45,26 +54,23 @@
   }
 
   &[aria-pressed='true'] {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: var(--accent-contrast);
-
-    .count {
-      color: inherit;
-    }
+    border-bottom-color: var(--accent);
+    color: var(--accent);
   }
 }
 
 .filter-tech {
-  min-height: 32px;
-  border-color: var(--border);
-  background: transparent;
-  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-faint);
 }
 
 .count {
-  font-size: 0.75rem;
-  color: var(--text-faint);
+  margin-left: 0.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent);
 }
 
 .results {
@@ -79,8 +85,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 1.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
