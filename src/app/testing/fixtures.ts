@@ -1,0 +1,120 @@
+import type { Portfolio, Project } from '../core/models/portfolio.models';
+
+export function projectFixture(overrides: Partial<Project> = {}): Project {
+  return {
+    id: overrides.slug ?? 'p1',
+    title: 'Proyecto',
+    slug: 'proyecto',
+    shortDescription: 'Descripción',
+    fullDescription: null,
+    problem: 'Problema',
+    solution: 'Solución',
+    role: null,
+    category: 'WEB_APP',
+    status: 'IN_PROGRESS',
+    repositoryUrl: null,
+    liveUrl: null,
+    coverImageUrl: null,
+    coverImageAlt: null,
+    startDate: null,
+    endDate: null,
+    isFeatured: false,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    technologies: [{ id: 't1', name: 'Angular', slug: 'angular', icon: null }],
+    responsibilities: [],
+    images: [],
+    ...overrides,
+  };
+}
+
+/** Minimal but complete public payload used by component and service tests. */
+export function portfolioFixture(overrides: Partial<Portfolio> = {}): Portfolio {
+  return {
+    site: {
+      siteTitle: 'Sitio de prueba',
+      siteDescription: 'Descripción',
+      ogImageUrl: null,
+      defaultTheme: 'DARK',
+      defaultLocale: 'es',
+      contactFormEnabled: true,
+    },
+    profile: {
+      fullName: 'Persona Prueba',
+      professionalTitle: 'Desarrollador',
+      shortBio: 'Bio corta',
+      longBio: 'Párrafo uno.\n\nPárrafo dos.',
+      location: 'Ciudad, País',
+      publicEmail: 'persona@test.local',
+      phone: null,
+      availability: null,
+      profileImageUrl: null,
+      profileImageAlt: null,
+      cvFileUrl: null,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
+    highlights: [{ id: 'h1', kind: 'WORK_STYLE', title: 'Resolver problemas', description: 'Texto' }],
+    socialLinks: [],
+    experiences: [
+      {
+        id: 'e1',
+        company: 'Empresa Actual',
+        position: 'Analista',
+        location: null,
+        employmentType: null,
+        workMode: null,
+        startDate: '2026-02-01T00:00:00.000Z',
+        endDate: null,
+        isCurrent: true,
+        datePrecision: 'MONTH',
+        summary: null,
+        displayOrder: 0,
+        responsibilities: [],
+        achievements: [],
+        technologies: [],
+      },
+      {
+        id: 'e2',
+        company: 'Empresa Anterior',
+        position: 'Practicante',
+        location: null,
+        employmentType: 'INTERNSHIP',
+        workMode: null,
+        startDate: '2024-08-01T00:00:00.000Z',
+        endDate: '2024-10-01T00:00:00.000Z',
+        isCurrent: false,
+        datePrecision: 'MONTH',
+        summary: null,
+        displayOrder: 1,
+        responsibilities: ['Soporte'],
+        achievements: [],
+        technologies: [],
+      },
+    ],
+    education: [],
+    skillCategories: [
+      {
+        id: 'c1',
+        name: 'Backend',
+        slug: 'backend',
+        description: null,
+        skills: [
+          { id: 's1', name: 'NestJS', slug: 'nestjs', description: null, proficiencyLabel: null, yearsOfExperience: null, icon: null, isFeatured: true },
+          { id: 's2', name: 'Laravel', slug: 'laravel', description: null, proficiencyLabel: null, yearsOfExperience: null, icon: null, isFeatured: false },
+        ],
+      },
+    ],
+    certifications: [],
+    projects: [
+      projectFixture({ id: 'p1', slug: 'destacado', title: 'Destacado', isFeatured: true }),
+      projectFixture({ id: 'p2', slug: 'otro', title: 'Otro', category: 'API' }),
+    ],
+    projectFilters: {
+      technologies: [{ name: 'Angular', slug: 'angular', count: 2 }],
+      categories: [
+        { value: 'WEB_APP', count: 1 },
+        { value: 'API', count: 1 },
+      ],
+    },
+    ...overrides,
+  };
+}

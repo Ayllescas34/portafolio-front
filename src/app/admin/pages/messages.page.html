@@ -1,0 +1,79 @@
+<header class="page-head">
+  <div>
+    <h1>Mensajes</h1>
+    <p class="muted">Recibidos desde el formulario de contacto. Se guardan solo en tu base de datos local.</p>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="tabs" role="tablist" aria-label="Estado de los mensajes">
+    @for (t of tabs; track t.value) {
+      <button type="button" role="tab" class="tab" [attr.aria-selected]="tab() === t.value" (click)="selectTab(t.value)">{{ t.label }}</button>
+    }
+  </div>
+  <div class="search">
+    <label class="visually-hidden" for="messages-search">Buscar mensajes</label>
+    <app-icon name="search" [size]="18" />
+    <input id="messages-search" class="input" type="search" placeholder="Nombre, correo o asunto" (input)="onSearch($any($event.target).value)" />
+  </div>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <app-async-state state="loading" />
+  }
+  @case ('error') {
+    <app-async-state state="error" [errorText]="errorText()" (retry)="load()" />
+  }
+  @default {
+    @if (items().length === 0) {
+      <app-async-state state="empty" emptyText="No hay mensajes en esta vista." />
+    } @else {
+      <ul class="list" role="tabpanel">
+        @for (m of items(); track m.id) {
+          <li class="card message" [class.unread]="m.status === 'NEW'">
+            <button
+              type="button"
+              class="summary"
+              [attr.aria-expanded]="openId() === m.id"
+              [attr.aria-controls]="'message-' + m.id"
+              (click)="toggle(m)"
+            >
+              @if (m.status === 'NEW') {
+                <span class="dot" aria-hidden="true"></span><span class="visually-hidden">Nuevo:</span>
+              }
+              <span class="from">{{ m.name }}</span>
+              <span class="subject">{{ m.subject }}</span>
+              <time class="date" [attr.datetime]="m.createdAt">{{ m.createdAt | date: 'd MMM y, HH:mm' }}</time>
+            </button>
+            @if (openId() === m.id) {
+              <div class="detail" [id]="'message-' + m.id">
+                <p class="meta"><app-icon name="mail" [size]="16" /><a [href]="replyHref(m)">{{ m.email }}</a></p>
+                <p class="body">{{ m.message }}</p>
+                <div class="actions">
+                  <a class="btn btn-sm btn-primary" [href]="replyHref(m)"><app-icon name="mail" [size]="16" />Responder</a>
+                  @if (m.status !== 'ARCHIVED') {
+                    <button type="button" class="btn btn-sm" (click)="setStatus(m, 'ARCHIVED')">Archivar</button>
+                  }
+                  @if (m.status !== 'NEW') {
+                    <button type="button" class="btn btn-sm btn-ghost" (click)="setStatus(m, 'NEW')">Marcar como nuevo</button>
+                  }
+                  <button type="button" class="btn btn-sm btn-danger" (click)="remove(m)"><app-icon name="trash" [size]="16" />Eliminar</button>
+                </div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+      @if (meta(); as meta) {
+        @if (meta.totalPages > 1) {
+          <nav class="pagination" aria-label="Paginación">
+            <button type="button" class="btn btn-sm" [disabled]="meta.page <= 1" (click)="load(meta.page - 1)">Anterior</button>
+            <span>Página {{ meta.page }} de {{ meta.totalPages }}</span>
+            <button type="button" class="btn btn-sm" [disabled]="meta.page >= meta.totalPages" (click)="load(meta.page + 1)">Siguiente</button>
+          </nav>
+        }
+      }
+    }
+  }
+}

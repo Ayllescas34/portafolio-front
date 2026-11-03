@@ -1,0 +1,115 @@
+<div class="container page">
+  <a class="back" routerLink="/" fragment="proyectos"><app-icon name="arrow-left" [size]="18" />{{ t().projects.back }}</a>
+
+  @switch (state()) {
+    @case ('loading') {
+      <app-async-state state="loading" [loadingText]="t().states.loading" />
+    }
+    @case ('not-found') {
+      <div class="missing">
+        <h1>{{ t().projects.notFound }}</h1>
+        <a class="btn" routerLink="/" fragment="proyectos">{{ t().projects.back }}</a>
+      </div>
+    }
+    @case ('error') {
+      <app-async-state state="error" [errorText]="errorText()" (retry)="load(slug())" />
+    }
+    @case ('ready') {
+      @if (project(); as p) {
+        <article aria-labelledby="project-title">
+          <header class="head">
+            <div class="tags">
+              <span class="chip">{{ t().enums.projectCategory[p.category] }}</span>
+              <span class="badge">{{ t().enums.projectStatus[p.status] }}</span>
+              @if (p.startDate) {
+                <span class="mono period">{{ { startDate: p.startDate, endDate: p.endDate, datePrecision: 'MONTH' } | period }}</span>
+              }
+            </div>
+            <h1 id="project-title">{{ p.title }}</h1>
+            <p class="lead">{{ p.shortDescription }}</p>
+            <div class="links">
+              @if (p.liveUrl) {
+                <a class="btn btn-primary" [href]="p.liveUrl" target="_blank" rel="noopener noreferrer">
+                  {{ t().projects.live }}<app-icon name="external" /><span class="visually-hidden">(pestaña nueva)</span>
+                </a>
+              }
+              @if (p.repositoryUrl) {
+                <a class="btn" [href]="p.repositoryUrl" target="_blank" rel="noopener noreferrer">
+                  <app-icon name="github" />{{ t().projects.repository }}<span class="visually-hidden">(pestaña nueva)</span>
+                </a>
+              }
+            </div>
+          </header>
+
+          @if (p.coverImageUrl) {
+            <img class="cover" [src]="p.coverImageUrl" [alt]="p.coverImageAlt ?? ''" width="1200" height="675" />
+          }
+
+          <div class="layout">
+            <div class="main">
+              @if (p.problem) {
+                <section class="block">
+                  <h2>{{ t().projects.problem }}</h2>
+                  <p>{{ p.problem }}</p>
+                </section>
+              }
+              @if (p.solution) {
+                <section class="block">
+                  <h2>{{ t().projects.solution }}</h2>
+                  <p>{{ p.solution }}</p>
+                </section>
+              }
+              @if (p.fullDescription) {
+                <section class="block prose">
+                  @for (paragraph of p.fullDescription.split('\n\n'); track $index) {
+                    <p>{{ paragraph }}</p>
+                  }
+                </section>
+              }
+              @if (p.images.length) {
+                <section class="block">
+                  <h2>{{ t().projects.gallery }}</h2>
+                  <ul class="gallery">
+                    @for (image of p.images; track image.id) {
+                      <li>
+                        <figure>
+                          <img [src]="image.imageUrl" [alt]="image.altText" loading="lazy" decoding="async" />
+                          @if (image.caption) {
+                            <figcaption>{{ image.caption }}</figcaption>
+                          }
+                        </figure>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+            </div>
+
+            <aside class="card aside">
+              @if (p.role) {
+                <h2 class="aside-title">{{ t().projects.role }}</h2>
+                <p>{{ p.role }}</p>
+              }
+              @if (p.responsibilities.length) {
+                <h2 class="aside-title">{{ t().projects.responsibilities }}</h2>
+                <ul class="bullets">
+                  @for (line of p.responsibilities; track $index) {
+                    <li>{{ line }}</li>
+                  }
+                </ul>
+              }
+              @if (p.technologies.length) {
+                <h2 class="aside-title">{{ t().projects.technologies }}</h2>
+                <ul class="chip-list">
+                  @for (tech of p.technologies; track tech.id) {
+                    <li class="chip">{{ tech.name }}</li>
+                  }
+                </ul>
+              }
+            </aside>
+          </div>
+        </article>
+      }
+    }
+  }
+</div>

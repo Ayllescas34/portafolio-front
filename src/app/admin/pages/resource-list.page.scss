@@ -1,0 +1,172 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.search {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 420px;
+
+  app-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  .input {
+    padding-left: 2.5rem;
+  }
+}
+
+.filter {
+  width: auto;
+}
+
+.count {
+  margin: 0 0 0 auto;
+  color: var(--text-faint);
+  font-size: 0.88rem;
+}
+
+.rows {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+
+  &[aria-busy='true'] {
+    opacity: 0.6;
+  }
+}
+
+.row:not(:has(.order)) {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.hidden-item .title {
+  color: var(--text-muted);
+}
+
+.order {
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  display: grid;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.secondary {
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cols {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+
+  dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status {
+  --btn-bg: transparent;
+  color: var(--text-faint);
+
+  &.on {
+    --btn-bg: var(--accent-soft);
+    --btn-border: transparent;
+    color: var(--accent);
+  }
+}
+
+.delete:hover {
+  color: var(--danger);
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .row,
+  .row:not(:has(.order)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .order {
+    grid-row: span 2;
+    order: 3;
+  }
+
+  .cols {
+    grid-column: 1 / -1;
+    order: 4;
+    flex-wrap: wrap;
+  }
+}

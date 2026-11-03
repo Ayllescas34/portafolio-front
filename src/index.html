@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>Portafolio profesional</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Portafolio profesional y hoja de vida interactiva." />
+    <meta name="theme-color" content="#0a0d14" />
+    <meta name="color-scheme" content="dark light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Portafolio profesional" />
+    <meta property="og:description" content="Portafolio profesional y hoja de vida interactiva." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      // Apply the saved theme before Angular boots to avoid a flash of the wrong theme.
+      (function () {
+        try {
+          var saved = localStorage.getItem('portfolio.theme');
+          var light = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+          document.documentElement.dataset.theme = saved || (light ? 'light' : 'dark');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+    <noscript>
+      <p style="padding: 2rem; font-family: system-ui, sans-serif">
+        Este portafolio necesita JavaScript para mostrar su contenido.
+      </p>
+    </noscript>
+  </body>
+</html>

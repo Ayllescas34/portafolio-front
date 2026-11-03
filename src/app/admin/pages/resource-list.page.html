@@ -1,0 +1,111 @@
+@let r = resource();
+<header class="page-head">
+  <div>
+    <h1>{{ r.title }}</h1>
+    @if (r.description) {
+      <p class="muted">{{ r.description }}</p>
+    }
+  </div>
+  <a class="btn btn-primary" [routerLink]="['/admin', r.key, 'nuevo']"><app-icon name="plus" />Nuevo {{ r.singular }}</a>
+</header>
+
+<div class="toolbar">
+  @if (r.searchable) {
+    <div class="search">
+      <label class="visually-hidden" for="list-search">Buscar en {{ r.title }}</label>
+      <app-icon name="search" [size]="18" />
+      <input id="list-search" class="input" type="search" placeholder="Buscar…" (input)="onSearch($any($event.target).value)" />
+    </div>
+  }
+  @if (r.publishable) {
+    <label class="visually-hidden" for="list-published">Filtrar por estado de publicación</label>
+    <select id="list-published" class="input filter" [value]="published()" (change)="onPublishedFilter($any($event.target).value)">
+      <option value="all">Todos</option>
+      <option value="true">Publicados</option>
+      <option value="false">Ocultos (borradores)</option>
+    </select>
+  }
+  @if (meta(); as m) {
+    <p class="count" role="status">{{ m.total }} {{ m.total === 1 ? 'registro' : 'registros' }}</p>
+  }
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <app-async-state state="loading" />
+  }
+  @case ('error') {
+    <app-async-state state="error" [errorText]="errorText()" (retry)="load()" />
+  }
+  @default {
+    @if (items().length === 0) {
+      <div class="empty card">
+        <p>{{ search() || published() !== 'all' ? 'No hay resultados con estos filtros.' : 'Aún no hay registros.' }}</p>
+        <a class="btn btn-sm" [routerLink]="['/admin', r.key, 'nuevo']"><app-icon name="plus" [size]="16" />Crear el primero</a>
+      </div>
+    } @else {
+      <ul class="rows" [attr.aria-label]="r.title">
+        @for (item of items(); track item.id; let i = $index, first = $first, last = $last) {
+          <li class="row card" [class.hidden-item]="r.publishable && !item['isPublished']" [attr.aria-busy]="busyId() === item.id">
+            @if (canReorder()) {
+              <div class="order">
+                <button type="button" class="btn btn-ghost btn-sm btn-icon" [id]="'move-up-' + item.id" [disabled]="first" (click)="move(i, -1)" [attr.aria-label]="'Subir ' + r.primary(item)">
+                  <app-icon name="arrow-up" [size]="16" />
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm btn-icon" [id]="'move-down-' + item.id" [disabled]="last" (click)="move(i, 1)" [attr.aria-label]="'Bajar ' + r.primary(item)">
+                  <app-icon name="arrow-down" [size]="16" />
+                </button>
+              </div>
+            }
+            <div class="main">
+              <a class="title" [routerLink]="['/admin', r.key, item.id]">{{ r.primary(item) || '(sin título)' }}</a>
+              @if (r.secondary?.(item); as secondary) {
+                <span class="muted secondary">{{ secondary }}</span>
+              }
+            </div>
+            <dl class="cols">
+              @for (column of r.columns; track column.key) {
+                <div>
+                  <dt>{{ column.label }}</dt>
+                  <dd>{{ cell(item, column) }}</dd>
+                </div>
+              }
+            </dl>
+            <div class="actions">
+              @if (r.publishable) {
+                <button
+                  type="button"
+                  class="btn btn-sm status"
+                  [class.on]="item['isPublished']"
+                  [attr.aria-pressed]="!!item['isPublished']"
+                  [disabled]="busyId() === item.id"
+                  (click)="togglePublished(item)"
+                  [attr.aria-label]="(item['isPublished'] ? 'Ocultar ' : 'Publicar ') + r.primary(item)"
+                >
+                  <app-icon [name]="item['isPublished'] ? 'eye' : 'eye-off'" [size]="16" />
+                  {{ item['isPublished'] ? 'Publicado' : 'Oculto' }}
+                </button>
+              }
+              <a class="btn btn-ghost btn-sm btn-icon" [routerLink]="['/admin', r.key, item.id]" [attr.aria-label]="'Editar ' + r.primary(item)">
+                <app-icon name="edit" [size]="16" />
+              </a>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon delete" [disabled]="busyId() === item.id" (click)="remove(item)" [attr.aria-label]="'Eliminar ' + r.primary(item)">
+                <app-icon name="trash" [size]="16" />
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+
+      @if (meta(); as m) {
+        @if (m.totalPages > 1) {
+          <nav class="pagination" aria-label="Paginación">
+            <button type="button" class="btn btn-sm" [disabled]="m.page <= 1" (click)="goTo(m.page - 1)">Anterior</button>
+            <span>Página {{ m.page }} de {{ m.totalPages }}</span>
+            <button type="button" class="btn btn-sm" [disabled]="m.page >= m.totalPages" (click)="goTo(m.page + 1)">Siguiente</button>
+          </nav>
+        }
+      }
+    }
+  }
+}

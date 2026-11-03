@@ -1,0 +1,162 @@
+import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import type { ApiErrorDetail } from '../../core/models/api.models';
+import type { AdminRecord, FieldDef } from './resource.types';
+
+const URL_PATTERN = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+
+export type ImageGroup = FormGroup<{
+  imageUrl: FormControl<string>;
+  altText: FormControl<string>;
+  caption: FormControl<string>;
+}>;
+
+export function imageGroup(value?: { imageUrl?: string; altText?: string; caption?: string | null }): ImageGroup {
+  return new FormGroup({
+    imageUrl: new FormControl(value?.imageUrl ?? '', { nonNullable: true, validators: Validators.required }),
+    altText: new FormControl(value?.altText ?? '', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(200)],
+    }),
+    caption: new FormControl(value?.caption ?? '', { nonNullable: true, validators: Validators.maxLength(300) }),
+  });
+}
+
+function validators(field: FieldDef): ValidatorFn[] {
+  const list: ValidatorFn[] = [];
+  if (field.required) list.push(field.type === 'checkbox' ? Validators.requiredTrue : Validators.required);
+  if (field.maxLength) list.push(Validators.maxLength(field.maxLength));
+  if (field.type === 'email') list.push(Validators.email);
+  if (field.type === 'url') list.push(Validators.pattern(URL_PATTERN));
+  if (field.min !== undefined) list.push(Validators.min(field.min));
+  return list;
+}
+
+/** Builds a reactive form whose shape mirrors the field definitions. */
+export function buildForm(fields: FieldDef[]): FormGroup<Record<string, AbstractControl>> {
+  const controls: Record<string, AbstractControl> = {};
+  for (const field of fields) {
+    switch (field.type) {
+      case 'list':
+        controls[field.key] = new FormArray<FormControl<string>>([]);
+        break;
+      case 'images':
+        controls[field.key] = new FormArray<ImageGroup>([]);
+        break;
+      case 'technologies':
+        controls[field.key] = new FormControl<string[]>([], { nonNullable: true });
+        break;
+      case 'checkbox':
+        controls[field.key] = new FormControl<boolean>(false, { nonNullable: true });
+        break;
+      default:
+        controls[field.key] = new FormControl<string | number | null>('', validators(field));
+    }
+  }
+  return new FormGroup(controls);
+}
+
+export function listItem(value = '', maxLength = 500): FormControl<string> {
+  return new FormControl(value, { nonNullable: true, validators: [Validators.required, Validators.maxLength(maxLength)] });
+}
+
+/** API record -> form value (dates to YYYY-MM-DD, relations to ids). */
+export function patchForm(form: FormGroup, fields: FieldDef[], record: AdminRecord): void {
+  for (const field of fields) {
+    const control = form.get(field.key);
+    if (!control) continue;
+    const raw = record[field.key];
+    switch (field.type) {
+      case 'list': {
+        const array = control as FormArray<FormControl<string>>;
+        array.clear();
+        for (const line of (raw as string[] | undefined) ?? []) array.push(listItem(line, field.maxLength));
+        break;
+      }
+      case 'images': {
+        const array = control as FormArray<ImageGroup>;
+        array.clear();
+        for (const image of (raw as { imageUrl: string; altText: string; caption: string | null }[] | undefined) ?? []) {
+          array.push(imageGroup(image));
+        }
+        break;
+      }
+      case 'technologies': {
+        const techs = (record['technologies'] as { id: string }[] | undefined) ?? [];
+        control.setValue(raw ?? techs.map((t) => t.id));
+        break;
+      }
+      case 'date':
+        control.setValue(typeof raw === 'string' ? raw.slice(0, 10) : '');
+        break;
+      case 'checkbox':
+        control.setValue(raw === true);
+        break;
+      default:
+        control.setValue(raw ?? '');
+    }
+  }
+  form.markAsPristine();
+}
+
+/** Form value -> API payload: trims, empty optional values become null. */
+export function toPayload(form: FormGroup, fields: FieldDef[]): AdminRecord {
+  const value = form.getRawValue() as Record<string, unknown>;
+  const payload: AdminRecord = {};
+  for (const field of fields) {
+    const raw = value[field.key];
+    switch (field.type) {
+      case 'list':
+        payload[field.key] = (raw as string[]).map((line) => line.trim()).filter(Boolean);
+        break;
+      case 'images':
+        payload[field.key] = (raw as { imageUrl: string; altText: string; caption: string }[]).map((img) => ({
+          imageUrl: img.imageUrl.trim(),
+          altText: img.altText.trim(),
+          caption: img.caption.trim() || null,
+        }));
+        break;
+      case 'checkbox':
+      case 'technologies':
+        payload[field.key] = raw;
+        break;
+      case 'number':
+        payload[field.key] = raw === '' || raw === null ? null : Number(raw);
+        break;
+      default: {
+        const text = typeof raw === 'string' ? raw.trim() : raw;
+        // Slugs are generated by the API when omitted; other empty fields are cleared.
+        if (text === '' && field.key === 'slug') continue;
+        payload[field.key] = text === '' ? null : text;
+      }
+    }
+  }
+  return payload;
+}
+
+/** Shows API validation messages next to the matching controls. */
+export function applyServerErrors(form: FormGroup, details: ApiErrorDetail[]): string[] {
+  const unmatched: string[] = [];
+  for (const detail of details) {
+    const control = form.get(detail.field.split('.'));
+    if (control) {
+      control.setErrors({ ...(control.errors ?? {}), server: detail.errors[0] });
+      control.markAsTouched();
+    } else {
+      unmatched.push(`${detail.field}: ${detail.errors.join(', ')}`);
+    }
+  }
+  return unmatched;
+}
+
+/** Human readable message for the first error of a control. */
+export function controlError(control: AbstractControl | null, field?: FieldDef): string | null {
+  if (!control || !control.invalid || !(control.touched || control.dirty)) return null;
+  const errors = control.errors ?? {};
+  if (errors['server']) return String(errors['server']);
+  if (errors['required']) return 'Este campo es obligatorio.';
+  if (errors['maxlength']) return `Máximo ${(errors['maxlength'] as { requiredLength: number }).requiredLength} caracteres.`;
+  if (errors['email']) return 'Escribe un correo válido.';
+  if (errors['pattern'] && field?.type === 'url') return 'Escribe una URL completa que empiece con https://';
+  if (errors['min']) return `El valor mínimo es ${(errors['min'] as { min: number }).min}.`;
+  return 'Valor no válido.';
+}

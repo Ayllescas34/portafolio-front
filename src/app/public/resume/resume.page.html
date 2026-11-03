@@ -1,0 +1,147 @@
+<div class="container wrapper">
+  <div class="toolbar no-print">
+    <a class="btn btn-ghost btn-sm" routerLink="/"><app-icon name="arrow-left" [size]="16" />{{ t().resume.back }}</a>
+    <button type="button" class="btn btn-primary btn-sm" (click)="print()">
+      <app-icon name="printer" [size]="16" />{{ t().resume.print }}
+    </button>
+  </div>
+
+  @if (p(); as p) {
+    <article class="sheet" aria-labelledby="cv-name">
+      <header class="cv-head">
+        <div>
+          <h1 id="cv-name">{{ p.profile.fullName }}</h1>
+          <p class="cv-title">{{ p.profile.professionalTitle }}</p>
+        </div>
+        <ul class="cv-contact" [attr.aria-label]="t().resume.contact">
+          @if (p.profile.publicEmail) {
+            <li><app-icon name="mail" [size]="15" />{{ p.profile.publicEmail }}</li>
+          }
+          @if (p.profile.phone) {
+            <li><app-icon name="phone" [size]="15" />{{ p.profile.phone }}</li>
+          }
+          @if (p.profile.location) {
+            <li><app-icon name="map-pin" [size]="15" />{{ p.profile.location }}</li>
+          }
+          @for (link of p.socialLinks; track link.id) {
+            <li><app-icon name="link" [size]="15" />{{ link.url.replace('https://', '') }}</li>
+          }
+        </ul>
+      </header>
+
+      <section class="cv-section">
+        <h2>{{ t().resume.profile }}</h2>
+        <p>{{ p.profile.shortBio }}</p>
+      </section>
+
+      @if (p.experiences.length) {
+        <section class="cv-section">
+          <h2>{{ t().experience.title }}</h2>
+          @for (item of p.experiences; track item.id) {
+            <div class="cv-entry">
+              <div class="cv-entry-head">
+                <h3>{{ item.position }} <span class="org">· {{ item.company }}</span></h3>
+                <span class="cv-date">{{ item | period }}</span>
+              </div>
+              @if (item.summary) {
+                <p>{{ item.summary }}</p>
+              }
+              @if (item.responsibilities.length || item.achievements.length) {
+                <ul>
+                  @for (line of item.responsibilities; track $index) {
+                    <li>{{ line }}</li>
+                  }
+                  @for (line of item.achievements; track $index) {
+                    <li>{{ line }}</li>
+                  }
+                </ul>
+              }
+              @if (item.technologies.length) {
+                <p class="cv-tech">
+                  @for (tech of item.technologies; track tech.id; let last = $last) {
+                    {{ tech.name }}{{ last ? '' : ' · ' }}
+                  }
+                </p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (p.education.length) {
+        <section class="cv-section">
+          <h2>{{ t().education.title }}</h2>
+          @for (item of p.education; track item.id) {
+            <div class="cv-entry">
+              <div class="cv-entry-head">
+                <h3>{{ item.program }} <span class="org">· {{ item.institution }}</span></h3>
+                <span class="cv-date">
+                  @if (item.startDate || item.endDate) {
+                    {{ item | period }}
+                  } @else {
+                    {{ t().enums.educationStatus[item.status] }}
+                  }
+                </span>
+              </div>
+              @if (item.description) {
+                <p>{{ item.description }}</p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (p.skillCategories.length) {
+        <section class="cv-section">
+          <h2>{{ t().skills.title }}</h2>
+          <dl class="cv-skills">
+            @for (category of p.skillCategories; track category.id) {
+              <div>
+                <dt>{{ category.name }}</dt>
+                <dd>
+                  @for (skill of category.skills; track skill.id; let last = $last) {
+                    {{ skill.name }}{{ last ? '' : ', ' }}
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+      }
+
+      @if (p.certifications.length) {
+        <section class="cv-section">
+          <h2>{{ t().certifications.title }}</h2>
+          @for (cert of p.certifications; track cert.id) {
+            <div class="cv-entry-head">
+              <h3>{{ cert.name }} <span class="org">· {{ cert.issuer }}</span></h3>
+              @if (cert.issueDate) {
+                <span class="cv-date">{{ { startDate: cert.issueDate, endDate: null, datePrecision: cert.datePrecision } | period }}</span>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (p.projects.length) {
+        <section class="cv-section">
+          <h2>{{ t().projects.title }}</h2>
+          @for (project of p.projects; track project.id) {
+            <div class="cv-entry">
+              <h3>{{ project.title }}</h3>
+              <p>{{ project.shortDescription }}</p>
+            </div>
+          }
+        </section>
+      }
+
+      <footer class="cv-foot">{{ t().resume.updated }}: {{ updated() }}</footer>
+    </article>
+  } @else {
+    <app-async-state
+      [state]="store.state() === 'error' ? 'error' : 'loading'"
+      [errorText]="store.error()?.message ?? t().states.error"
+      (retry)="store.load(true)"
+    />
+  }
+</div>

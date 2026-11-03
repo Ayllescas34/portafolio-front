@@ -1,0 +1,160 @@
+.timeline {
+  position: relative;
+  display: grid;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  // Vertical rail
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: 200px;
+    width: 1px;
+    background: linear-gradient(var(--accent), var(--border) 30%, var(--border));
+  }
+}
+
+.entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 170px 60px 1fr;
+  align-items: start;
+}
+
+.when {
+  display: grid;
+  gap: 0.15rem;
+  padding-top: 1.35rem;
+  text-align: right;
+}
+
+.period {
+  font-size: 0.85rem;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.duration {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+.dot {
+  justify-self: center;
+  width: 13px;
+  height: 13px;
+  margin-top: 1.6rem;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg);
+  // Align the centre of the dot with the rail at 200px.
+  transform: translateX(0);
+}
+
+.current .dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 5px var(--accent-soft);
+}
+
+.body {
+  padding: 1.35rem 1.5rem;
+  transition: border-color var(--dur) var(--ease);
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+.current .body {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+h3 {
+  margin-bottom: 0.15rem;
+  font-size: 1.2rem;
+}
+
+.company {
+  margin-bottom: 0.65rem;
+  font-weight: 500;
+}
+
+.meta {
+  margin-bottom: 0.85rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.summary {
+  color: var(--text-muted);
+}
+
+.label {
+  margin: 1rem 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.bullets {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+    padding-left: 1.15rem;
+    color: var(--text-muted);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.7em;
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--accent);
+      opacity: 0.7;
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .timeline::before {
+    left: 6px;
+  }
+
+  .entry {
+    grid-template-columns: 1fr;
+    padding-left: 2rem;
+  }
+
+  .when {
+    padding-top: 0;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    grid-auto-flow: column;
+    justify-content: start;
+    gap: 0.75rem;
+  }
+
+  .dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin-top: 0.3rem;
+  }
+}

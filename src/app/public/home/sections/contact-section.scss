@@ -1,0 +1,87 @@
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.channels {
+  display: grid;
+  gap: 0.85rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 0;
+    color: var(--text-muted);
+  }
+
+  app-icon {
+    color: var(--accent);
+  }
+
+  a {
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+}
+
+.form-card {
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+.field-error,
+.field-hint {
+  margin: 0;
+}
+
+.field-hint {
+  text-align: right;
+}
+
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.submit {
+  justify-self: start;
+}
+
+.again {
+  margin-top: 1rem;
+}
+
+@media (max-width: 860px) {
+  .contact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .submit {
+    justify-self: stretch;
+  }
+}

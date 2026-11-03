@@ -1,0 +1,71 @@
+@let r = resource();
+<header class="page-head">
+  <div>
+    @if (!r.singleton) {
+      <a class="back" [routerLink]="['/admin', r.key]"><app-icon name="arrow-left" [size]="16" />{{ r.title }}</a>
+    }
+    <h1>{{ heading() }}</h1>
+    @if (r.description) {
+      <p class="muted">{{ r.description }}</p>
+    }
+  </div>
+  @if (publicUrl(); as url) {
+    <a class="btn btn-sm" [href]="url" target="_blank" rel="noopener">
+      <app-icon name="external" [size]="16" />Ver en el sitio<span class="visually-hidden"> (pestaña nueva)</span>
+    </a>
+  }
+</header>
+
+@switch (state()) {
+  @case ('loading') {
+    <app-async-state state="loading" />
+  }
+  @case ('error') {
+    <app-async-state state="error" [errorText]="loadError()" (retry)="init(resource(), id())" />
+  }
+  @default {
+    <div class="layout" [class.with-preview]="preview()">
+      <form class="form" [formGroup]="form()" (ngSubmit)="save()" novalidate>
+        @for (group of groups(); track $index) {
+          <section class="card group" [attr.aria-labelledby]="group.title ? 'group-' + $index : null">
+            @if (group.title) {
+              <h2 class="group-title" [id]="'group-' + $index">{{ group.title }}</h2>
+            }
+            <div class="grid">
+              @for (field of group.fields; track field.key) {
+                <app-dynamic-field [field]="field" [form]="form()" [class.wide]="field.wide" />
+              }
+            </div>
+          </section>
+        }
+
+        @if (formError(); as error) {
+          <div class="alert alert-error" role="alert"><app-icon name="alert" /><span>{{ error }}</span></div>
+        }
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            <app-icon name="check" />{{ saving() ? 'Guardando…' : 'Guardar' }}
+          </button>
+          @if (!r.singleton) {
+            <a class="btn btn-ghost" [routerLink]="['/admin', r.key]">Cancelar</a>
+          }
+          @if (form().dirty) {
+            <span class="dirty" role="status">Cambios sin guardar</span>
+          }
+          @if (!isNew() && !r.singleton) {
+            <button type="button" class="btn btn-danger delete" (click)="remove()"><app-icon name="trash" />Eliminar</button>
+          }
+        </div>
+      </form>
+
+      @if (preview(); as card) {
+        <aside class="preview" aria-label="Vista previa de la tarjeta pública">
+          <p class="eyebrow">Vista previa</p>
+          <app-project-card [project]="card" [linkable]="false" />
+          <p class="field-hint">Así se verá la tarjeta en la sección Proyectos.</p>
+        </aside>
+      }
+    </div>
+  }
+}

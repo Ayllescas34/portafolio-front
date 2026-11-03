@@ -1,0 +1,61 @@
+<a class="skip-link" href="#admin-content">Saltar al contenido</a>
+<div class="shell">
+  <aside class="sidebar" [class.open]="menuOpen()" id="admin-nav">
+    <div class="brand">
+      <span class="mark mono" aria-hidden="true">adm</span>
+      <span>Panel del portafolio</span>
+    </div>
+    <nav aria-label="Administración">
+      @for (section of nav; track section.title) {
+        <p class="section-title">{{ section.title }}</p>
+        <ul>
+          @for (item of section.items; track item.path) {
+            <li>
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item.path === '/admin' }"
+                #rla="routerLinkActive"
+                [attr.aria-current]="rla.isActive ? 'page' : null"
+              >
+                <app-icon [name]="item.icon" [size]="18" />{{ item.label }}
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button
+        type="button"
+        class="btn btn-ghost btn-icon menu"
+        aria-controls="admin-nav"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+        (click)="menuOpen.set(!menuOpen())"
+      >
+        <app-icon [name]="menuOpen() ? 'close' : 'menu'" />
+      </button>
+      <div class="spacer"></div>
+      <a class="btn btn-ghost btn-sm" href="/" target="_blank" rel="noopener"><app-icon name="external" [size]="16" />Ver sitio</a>
+      <button
+        type="button"
+        class="btn btn-ghost btn-icon"
+        (click)="theme.toggle()"
+        [attr.aria-label]="theme.theme() === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+      >
+        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" />
+      </button>
+      <a class="btn btn-ghost btn-sm account" routerLink="/admin/cuenta"><app-icon name="user" [size]="16" />{{ session.admin()?.name }}</a>
+      <button type="button" class="btn btn-sm" (click)="logout()"><app-icon name="logout" [size]="16" />Cerrar sesión</button>
+    </header>
+    <main id="admin-content" class="content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+<app-confirm-dialog />
+<app-toasts />

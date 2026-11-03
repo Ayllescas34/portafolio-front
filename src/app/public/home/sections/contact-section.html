@@ -1,0 +1,137 @@
+<section id="contacto" class="section" aria-labelledby="contact-title">
+  <div class="container contact">
+    <div class="intro" appReveal>
+      <p class="eyebrow">{{ t().contact.eyebrow }}</p>
+      <h2 id="contact-title" class="section-title">{{ t().contact.title }}</h2>
+      <p class="lead">{{ t().contact.lead }}</p>
+
+      <ul class="channels">
+        @if (profile()?.publicEmail; as email) {
+          <li>
+            <app-icon name="mail" />
+            <a [href]="'mailto:' + email">{{ email }}</a>
+          </li>
+        }
+        @if (profile()?.phone; as phone) {
+          <li>
+            <app-icon name="phone" />
+            <a [href]="telHref()">{{ phone }}</a>
+          </li>
+        }
+        @if (profile()?.location; as location) {
+          <li><app-icon name="map-pin" /><span>{{ location }}</span></li>
+        }
+        @for (link of socialLinks(); track link.id) {
+          <li>
+            <app-icon [name]="icon(link.platform)" />
+            <a [href]="link.url" target="_blank" rel="noopener noreferrer">
+              {{ link.label }}<span class="visually-hidden"> (se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="card form-card" appReveal>
+      @if (!enabled()) {
+        <p class="alert" role="status">{{ t().contact.disabled }}</p>
+      } @else if (status() === 'sent') {
+        <div class="alert alert-success" role="status">
+          <app-icon name="check" />
+          <span>{{ t().contact.success }}</span>
+        </div>
+        <button type="button" class="btn btn-sm again" (click)="status.set('idle')">{{ t().contact.another }}</button>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="row">
+            <div class="field">
+              <label class="field-label" for="contact-name">{{ t().contact.name }}</label>
+              <input
+                id="contact-name"
+                class="input"
+                formControlName="name"
+                autocomplete="name"
+                [attr.maxlength]="limits.name.max"
+                [attr.aria-invalid]="!!errorFor('name')"
+                [attr.aria-describedby]="errorFor('name') ? 'contact-name-error' : null"
+              />
+              @if (errorFor('name'); as error) {
+                <p class="field-error" id="contact-name-error">{{ error }}</p>
+              }
+            </div>
+            <div class="field">
+              <label class="field-label" for="contact-email">{{ t().contact.email }}</label>
+              <input
+                id="contact-email"
+                class="input"
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                inputmode="email"
+                [attr.aria-invalid]="!!errorFor('email')"
+                [attr.aria-describedby]="errorFor('email') ? 'contact-email-error' : null"
+              />
+              @if (errorFor('email'); as error) {
+                <p class="field-error" id="contact-email-error">{{ error }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="contact-subject">{{ t().contact.subject }}</label>
+            <input
+              id="contact-subject"
+              class="input"
+              formControlName="subject"
+              [attr.maxlength]="limits.subject.max"
+              [attr.aria-invalid]="!!errorFor('subject')"
+              [attr.aria-describedby]="errorFor('subject') ? 'contact-subject-error' : null"
+            />
+            @if (errorFor('subject'); as error) {
+              <p class="field-error" id="contact-subject-error">{{ error }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="contact-message">{{ t().contact.message }}</label>
+            <textarea
+              id="contact-message"
+              class="input"
+              rows="6"
+              formControlName="message"
+              [attr.maxlength]="limits.message.max"
+              [attr.aria-invalid]="!!errorFor('message')"
+              [attr.aria-describedby]="'contact-message-count' + (errorFor('message') ? ' contact-message-error' : '')"
+            ></textarea>
+            <p class="field-hint" id="contact-message-count">
+              {{ form.controls.message.value.length }} / {{ limits.message.max }}
+            </p>
+            @if (errorFor('message'); as error) {
+              <p class="field-error" id="contact-message-error">{{ error }}</p>
+            }
+          </div>
+
+          <!-- Honeypot: invisible to people and assistive tech; bots fill it. -->
+          <div class="hp" aria-hidden="true">
+            <label for="contact-website">{{ t().contact.honeypot }}</label>
+            <input id="contact-website" formControlName="website" tabindex="-1" autocomplete="off" />
+          </div>
+
+          @if (status() === 'error') {
+            <div class="alert alert-error" role="alert">
+              <app-icon name="alert" />
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          <button type="submit" class="btn btn-primary submit" [disabled]="status() === 'sending'">
+            {{ status() === 'sending' ? t().contact.sending : t().contact.send }}
+            @if (status() !== 'sending') {
+              <app-icon name="arrow-right" />
+            }
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</section>

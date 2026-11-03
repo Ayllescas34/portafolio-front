@@ -1,0 +1,213 @@
+@let f = field();
+@switch (f.type) {
+  @case ('checkbox') {
+    <label class="check" [for]="id()">
+      <input type="checkbox" [id]="id()" [formControl]="control()" />
+      <span>{{ f.label }}</span>
+    </label>
+    @if (f.hint) {
+      <p class="field-hint" [id]="id() + '-hint'">{{ f.hint }}</p>
+    }
+  }
+
+  @case ('list') {
+    <fieldset class="group-field">
+      <legend class="field-label">{{ f.label }}</legend>
+      @if (f.hint) {
+        <p class="field-hint">{{ f.hint }}</p>
+      }
+      <ol class="lines">
+        @for (item of array().controls; track item; let i = $index, first = $first, last = $last) {
+          <li class="line">
+            <label class="visually-hidden" [for]="id() + '-' + i">{{ f.label }} {{ i + 1 }}</label>
+            <input
+              class="input"
+              [id]="id() + '-' + i"
+              [formControl]="$any(item)"
+              [attr.maxlength]="f.maxLength"
+              [attr.aria-invalid]="!!itemError(i)"
+            />
+            <div class="line-actions">
+              <button type="button" class="btn btn-ghost btn-sm btn-icon" [disabled]="first" (click)="move(i, -1)" [attr.aria-label]="'Subir elemento ' + (i + 1)">
+                <app-icon name="arrow-up" [size]="16" />
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon" [disabled]="last" (click)="move(i, 1)" [attr.aria-label]="'Bajar elemento ' + (i + 1)">
+                <app-icon name="arrow-down" [size]="16" />
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon" (click)="removeAt(i)" [attr.aria-label]="'Quitar elemento ' + (i + 1)">
+                <app-icon name="trash" [size]="16" />
+              </button>
+            </div>
+            @if (itemError(i); as error) {
+              <p class="field-error">{{ error }}</p>
+            }
+          </li>
+        } @empty {
+          <li class="empty">Sin elementos.</li>
+        }
+      </ol>
+      <button type="button" class="btn btn-sm" (click)="addLine()"><app-icon name="plus" [size]="16" />Agregar</button>
+    </fieldset>
+  }
+
+  @case ('technologies') {
+    <fieldset class="group-field">
+      <legend class="field-label">{{ f.label }}</legend>
+      @if (lookups.technologies().length === 0) {
+        <p class="field-hint">Aún no hay tecnologías. Créalas en la sección Tecnologías.</p>
+      }
+      <div class="options">
+        @for (tech of lookups.technologies(); track tech.id) {
+          <label class="option" [class.selected]="isSelected(tech.id)">
+            <input type="checkbox" [checked]="isSelected(tech.id)" (change)="toggleTechnology(tech.id, $any($event.target).checked)" />
+            {{ tech.name }}
+          </label>
+        }
+      </div>
+    </fieldset>
+  }
+
+  @case ('images') {
+    <fieldset class="group-field">
+      <legend class="field-label">{{ f.label }}</legend>
+      <ol class="images">
+        @for (image of images().controls; track image; let i = $index) {
+          <li class="image card">
+            @if (image.controls.imageUrl.value) {
+              <img [src]="image.controls.imageUrl.value" [alt]="image.controls.altText.value" />
+            }
+            <div class="image-fields">
+              <div class="field">
+                <label class="field-label" [for]="id() + '-url-' + i">Imagen {{ i + 1 }}</label>
+                <div class="media-row">
+                  <input class="input" [id]="id() + '-url-' + i" [formControl]="image.controls.imageUrl" placeholder="/uploads/… o https://…" />
+                  <label class="btn btn-sm upload">
+                    <app-icon name="upload" [size]="16" />Subir
+                    <input type="file" accept="image/png,image/jpeg,image/webp" class="visually-hidden" (change)="uploadImageAt($event, i)" />
+                  </label>
+                </div>
+                @if (imageError(i, 'imageUrl'); as error) {
+                  <p class="field-error">{{ error }}</p>
+                }
+              </div>
+              <div class="field">
+                <label class="field-label" [for]="id() + '-alt-' + i">Texto alternativo</label>
+                <input class="input" [id]="id() + '-alt-' + i" [formControl]="image.controls.altText" maxlength="200" />
+                @if (imageError(i, 'altText'); as error) {
+                  <p class="field-error">{{ error }}</p>
+                }
+              </div>
+              <div class="field">
+                <label class="field-label" [for]="id() + '-cap-' + i">Pie de foto (opcional)</label>
+                <input class="input" [id]="id() + '-cap-' + i" [formControl]="image.controls.caption" maxlength="300" />
+              </div>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="images().removeAt(i); images().markAsDirty()">
+              <app-icon name="trash" [size]="16" />Quitar
+            </button>
+          </li>
+        }
+      </ol>
+      @if (uploadError(); as error) {
+        <p class="field-error" role="alert">{{ error }}</p>
+      }
+      <button type="button" class="btn btn-sm" (click)="addImage()"><app-icon name="plus" [size]="16" />Agregar captura</button>
+    </fieldset>
+  }
+
+  @default {
+    <div class="field">
+      <label class="field-label" [for]="id()">
+        {{ f.label }}
+        @if (f.required) {
+          <span class="required" aria-hidden="true">*</span>
+        }
+      </label>
+
+      @switch (f.type) {
+        @case ('textarea') {
+          <textarea
+            class="input"
+            [id]="id()"
+            [formControl]="control()"
+            [rows]="f.rows ?? 4"
+            [attr.maxlength]="f.maxLength"
+            [attr.aria-required]="f.required || null"
+            [attr.aria-invalid]="!!error()"
+            [attr.aria-describedby]="describedBy()"
+          ></textarea>
+        }
+        @case ('select') {
+          <select class="input" [id]="id()" [formControl]="control()" [attr.aria-invalid]="!!error()" [attr.aria-describedby]="describedBy()">
+            @if (!f.required) {
+              <option value="">— Sin especificar —</option>
+            }
+            @for (option of f.options; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        }
+        @case ('category') {
+          <select class="input" [id]="id()" [formControl]="control()" [attr.aria-invalid]="!!error()" [attr.aria-describedby]="describedBy()">
+            <option value="" disabled>Selecciona una categoría</option>
+            @for (option of lookups.categories(); track option.id) {
+              <option [value]="option.id">{{ option.name }}</option>
+            }
+          </select>
+        }
+        @case ('media') {
+          <div class="media-row">
+            <input
+              class="input"
+              [id]="id()"
+              [formControl]="control()"
+              placeholder="/uploads/… o https://…"
+              [attr.aria-invalid]="!!error()"
+              [attr.aria-describedby]="describedBy()"
+            />
+            <label class="btn btn-sm upload" [attr.aria-disabled]="uploading()">
+              <app-icon name="upload" [size]="16" />{{ uploading() ? 'Subiendo…' : 'Subir' }}
+              <input
+                type="file"
+                class="visually-hidden"
+                [accept]="f.mediaKind === 'document' ? 'application/pdf' : 'image/png,image/jpeg,image/webp'"
+                (change)="upload($event, control())"
+              />
+            </label>
+          </div>
+          @if (control().value && f.mediaKind !== 'document') {
+            <img class="media-preview" [src]="control().value" alt="Vista previa" />
+          }
+          @if (control().value && f.mediaKind === 'document') {
+            <a [href]="control().value" target="_blank" rel="noopener">Abrir documento actual</a>
+          }
+          @if (uploadError(); as error) {
+            <p class="field-error" role="alert">{{ error }}</p>
+          }
+        }
+        @default {
+          <input
+            class="input"
+            [id]="id()"
+            [type]="f.type === 'url' ? 'url' : f.type === 'email' ? 'email' : f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'"
+            [formControl]="control()"
+            [attr.maxlength]="f.maxLength"
+            [attr.min]="f.min"
+            [attr.step]="f.type === 'number' ? '0.5' : null"
+            [attr.placeholder]="f.placeholder"
+            [attr.aria-required]="f.required || null"
+            [attr.aria-invalid]="!!error()"
+            [attr.aria-describedby]="describedBy()"
+          />
+        }
+      }
+
+      @if (f.hint) {
+        <p class="field-hint" [id]="id() + '-hint'">{{ f.hint }}</p>
+      }
+      @if (error(); as error) {
+        <p class="field-error" [id]="id() + '-error'">{{ error }}</p>
+      }
+    </div>
+  }
+}

@@ -1,0 +1,155 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.tabs {
+  display: inline-flex;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.tab {
+  min-height: 36px;
+  padding: 0.3rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+}
+
+.search {
+  position: relative;
+  flex: 0 1 320px;
+
+  app-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+  }
+
+  .input {
+    padding-left: 2.5rem;
+  }
+}
+
+.list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.message {
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 180px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+.summary:not(:has(.dot)) {
+  padding-left: 1.65rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.from {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subject {
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unread .subject {
+  color: var(--text);
+}
+
+.date {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.detail {
+  padding: 0 1.1rem 1.1rem 1.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.9rem 0 0.5rem;
+}
+
+.body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 680px) {
+  .summary {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .subject {
+    grid-column: 2 / -1;
+  }
+}

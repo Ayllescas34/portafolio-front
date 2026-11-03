@@ -1,0 +1,152 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.project {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  transition:
+    transform var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+}
+
+.media {
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.placeholder {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.6rem;
+  height: 100%;
+  color: var(--accent);
+  background:
+    radial-gradient(80% 90% at 20% 10%, var(--accent-soft), transparent 70%),
+    radial-gradient(70% 80% at 90% 90%, var(--accent-2-soft), transparent 70%),
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 28px 28px;
+
+  span {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.75rem;
+  padding: 1.25rem 1.35rem 1.4rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1.2rem;
+
+  a {
+    color: var(--text);
+    text-decoration: none;
+
+    &:focus-visible {
+      outline: none; // the whole card shows the focus ring
+    }
+  }
+}
+
+// Makes the entire card clickable through the single heading link.
+.stretched::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.description {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.facts {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.25rem 0;
+
+  dt {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    color: var(--text-muted);
+  }
+}
+
+.chip-list {
+  margin-top: auto;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.featured {
+  @media (min-width: 900px) {
+    flex-direction: row;
+
+    .media {
+      flex: 0 0 46%;
+      aspect-ratio: auto;
+      min-height: 100%;
+      border-bottom: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    h3 {
+      font-size: 1.6rem;
+    }
+  }
+}
