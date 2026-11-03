@@ -65,7 +65,7 @@ export const es = {
   projects: {
     eyebrow: 'Proyectos',
     title: 'Proyectos y casos',
-    lead: 'Casos profesionales descritos sin información confidencial, junto con proyectos personales.',
+    lead: 'Casos profesionales descritos sin información confidencial, junto con proyectos personales y académicos.',
     featured: 'Caso destacado',
     all: 'Todos',
     filterBy: 'Filtrar por',

@@ -62,6 +62,7 @@ funcionando en http://localhost:3000.
 habla con un origen.
 
 Las pruebas E2E buscan la API en `../backend`. Si está en otra carpeta, indícala en `BACKEND_DIR`.
+Incluyen una revisión de accesibilidad con axe sobre el sitio y el panel, en ambos temas.
 
 ## Flujo de trabajo
 

@@ -24,7 +24,7 @@
 }
 
 .brand {
-  flex: 1 1 0;
+  flex: 1 0 auto;
   min-width: 0;
   color: var(--accent);
   text-decoration: none;
@@ -103,7 +103,7 @@
 
 .actions {
   display: flex;
-  flex: 1 1 0;
+  flex: 1 0 auto;
   align-items: center;
   justify-content: flex-end;
   gap: 0.25rem;
@@ -117,6 +117,14 @@
 .menu-toggle,
 .nav-resume {
   display: none;
+}
+
+// Laptops: the name stays whole, so the menu gives up its decoration.
+@media (max-width: 1400px) {
+  .slashes,
+  .nav ul a sup {
+    display: none;
+  }
 }
 
 @media (max-width: 1120px) {

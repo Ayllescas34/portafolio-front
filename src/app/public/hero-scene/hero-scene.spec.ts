@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MotionService } from '../../core/ui/motion.service';
-import { HeroSceneComponent, NETWORK_SCENE_LOADER, SCENE_COMPACT, WEBGL_SUPPORT } from './hero-scene';
+import { HeroSceneComponent, NETWORK_SCENE_LOADER, SCENE_COMPACT, SCENE_SCHEDULER, WEBGL_SUPPORT } from './hero-scene';
 import type { NetworkScene, SceneOptions } from './network-scene';
 
 describe('HeroSceneComponent', () => {
@@ -15,6 +15,7 @@ describe('HeroSceneComponent', () => {
         { provide: WEBGL_SUPPORT, useValue: () => options.webgl },
         { provide: NETWORK_SCENE_LOADER, useValue: () => Promise.resolve(factory) },
         { provide: SCENE_COMPACT, useValue: () => options.compact ?? false },
+        { provide: SCENE_SCHEDULER, useValue: (start: () => void) => start() },
       ],
     });
     TestBed.inject(MotionService).reduced.set(options.reduced);

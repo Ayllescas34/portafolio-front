@@ -80,7 +80,7 @@
                   [attr.aria-pressed]="!!item['isPublished']"
                   [disabled]="busyId() === item.id"
                   (click)="togglePublished(item)"
-                  [attr.aria-label]="(item['isPublished'] ? 'Ocultar ' : 'Publicar ') + r.primary(item)"
+                  [attr.aria-label]="(item['isPublished'] ? 'Publicado: ocultar ' : 'Oculto: publicar ') + r.primary(item)"
                 >
                   <app-icon [name]="item['isPublished'] ? 'eye' : 'eye-off'" [size]="16" />
                   {{ item['isPublished'] ? 'Publicado' : 'Oculto' }}

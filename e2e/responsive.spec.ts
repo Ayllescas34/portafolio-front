@@ -42,9 +42,13 @@ test.describe('Móvil', () => {
   test('el flujo de etapas se apila en vertical', async ({ page }) => {
     await page.goto('/#capacidades');
     const items = page.getByRole('list', { name: 'Del desarrollo al despliegue' }).getByRole('listitem');
-    const first = await items.nth(0).boundingBox();
-    const second = await items.nth(1).boundingBox();
-    expect(first && second && second.y > first.y && Math.abs(second.x - first.x) < 2).toBeTruthy();
+    await expect(items.first()).toBeVisible();
+    // Both boxes in the same frame: the page may still be scrolling to the section.
+    const [first, second] = await items.evaluateAll((elements) =>
+      elements.slice(0, 2).map((element) => element.getBoundingClientRect().toJSON() as DOMRect),
+    );
+    expect(second.y).toBeGreaterThan(first.y);
+    expect(Math.abs(second.x - first.x)).toBeLessThan(2);
   });
 
   test('el menú móvil es accesible por teclado', async ({ page }) => {

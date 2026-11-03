@@ -14,6 +14,15 @@ import {
 import { MotionService } from '../../core/ui/motion.service';
 import type { NetworkScene, NetworkSceneFactory } from './network-scene';
 
+/** The 3D scene is decorative: it starts once the first render has finished. */
+export const SCENE_SCHEDULER = new InjectionToken<(start: () => void) => void>('SCENE_SCHEDULER', {
+  providedIn: 'root',
+  factory: () => (start) => {
+    if ('requestIdleCallback' in window) window.requestIdleCallback(start, { timeout: 2000 });
+    else setTimeout(start, 200);
+  },
+});
+
 /** Loads Three.js only when the scene is actually going to render. */
 export const NETWORK_SCENE_LOADER = new InjectionToken<() => Promise<NetworkSceneFactory>>('NETWORK_SCENE_LOADER', {
   providedIn: 'root',
@@ -84,6 +93,7 @@ export class HeroSceneComponent {
   private readonly motion = inject(MotionService);
   private readonly zone = inject(NgZone);
   private readonly loader = inject(NETWORK_SCENE_LOADER);
+  private readonly schedule = inject(SCENE_SCHEDULER);
   private readonly supportsWebGL = inject(WEBGL_SUPPORT);
   private readonly compact = inject(SCENE_COMPACT);
   private readonly destroyRef = inject(DestroyRef);
@@ -93,13 +103,14 @@ export class HeroSceneComponent {
 
   constructor() {
     afterNextRender(() => {
-      if (this.supportsWebGL()) void this.init();
+      if (this.supportsWebGL()) this.schedule(() => void this.init());
       else this.mode.set('fallback');
     });
     effect(() => this.scene?.setReducedMotion(this.motion.reduced()));
   }
 
   private async init(): Promise<void> {
+    if (this.destroyRef.destroyed) return;
     const element = this.host().nativeElement;
     let factory: NetworkSceneFactory;
     try {

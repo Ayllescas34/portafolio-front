@@ -19,6 +19,20 @@ test.describe('Portafolio público', () => {
     await expect(page.locator('#formacion')).toContainText('Finalizando el cuarto semestre.');
   });
 
+  test('el logo y el menú caben completos en pantallas de laptop', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    for (const width of [1121, 1280, 1366, 1440]) {
+      await page.setViewportSize({ width, height: 800 });
+      const fits = await page.evaluate(() => {
+        const logo = document.querySelector<HTMLElement>('.logo')!;
+        const bar = document.querySelector<HTMLElement>('.bar')!;
+        return logo.scrollWidth <= logo.clientWidth && bar.scrollWidth <= bar.clientWidth;
+      });
+      expect(fits, `Encabezado a ${width}px`).toBe(true);
+    }
+  });
+
   test('publica metadatos y datos estructurados Person', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1')).toBeVisible();

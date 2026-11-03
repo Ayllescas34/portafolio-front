@@ -46,13 +46,22 @@ import { SkillsSectionComponent } from './sections/skills-section';
         </div>
       }
       @default {
-        <div class="container placeholder">
+        <div class="hero-placeholder force-dark">
           <app-async-state state="loading" [loadingText]="t().states.loading" />
         </div>
       }
     }
   `,
-  styles: `.placeholder { min-height: 60vh; display: grid; place-items: center; }`,
+  styles: `
+    .placeholder { min-height: 60vh; display: grid; place-items: center; }
+    .hero-placeholder {
+      display: grid;
+      place-items: center;
+      min-height: 100dvh;
+      margin-top: calc(-1 * var(--header-h));
+      background: #15161b;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage {
