@@ -24,7 +24,7 @@
             <li><app-icon name="map-pin" [size]="15" />{{ p.profile.location }}</li>
           }
           @for (link of p.socialLinks; track link.id) {
-            <li><app-icon name="link" [size]="15" />{{ link.url.replace('https://', '') }}</li>
+            <li><app-icon name="link" [size]="15" />{{ link.url.replace('https://', '').replace('www.', '') }}</li>
           }
         </ul>
       </header>

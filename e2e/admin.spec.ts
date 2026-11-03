@@ -55,7 +55,7 @@ test.describe.serial('Panel administrativo', () => {
     // Hide it from the list and confirm it disappears publicly
     await page.goto('/admin/proyectos');
     const row = page.getByRole('listitem').filter({ hasText: EDITED });
-    await row.getByRole('button', { name: `Ocultar ${EDITED}` }).click();
+    await row.getByRole('button', { name: `Publicado: ocultar ${EDITED}` }).click();
     await expect(page.getByText('Ocultado del sitio público.')).toBeVisible();
     await publicPage.goto(`/proyectos/${slug}`);
     await expect(publicPage.getByRole('heading', { name: 'El proyecto no existe o no está publicado.' })).toBeVisible();

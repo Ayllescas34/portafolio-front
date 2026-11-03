@@ -14,7 +14,7 @@ import { SectionId, SectionSpyService } from './section-spy.service';
   template: `
     <header class="header force-dark" [class.scrolled]="scrolled()" [class.overlay]="overlay()">
       <div class="bar">
-        <a class="brand" routerLink="/" fragment="inicio" [attr.aria-label]="name()" (click)="close()">
+        <a class="brand" routerLink="/" fragment="inicio" [attr.aria-label]="logo() + ' · ' + name()" (click)="close()">
           <span class="logo" aria-hidden="true">{{ logo() }}<span class="dot">.</span><span class="cursor">_</span></span>
         </a>
 
