@@ -1,9 +1,12 @@
-<section id="contacto" class="section" aria-labelledby="contact-title">
+<section id="contacto" class="section section-band" aria-labelledby="contact-title">
   <div class="container contact">
     <div class="intro" appReveal>
       <p class="eyebrow">{{ t().contact.eyebrow }}</p>
       <h2 id="contact-title" class="section-title">{{ t().contact.title }}</h2>
       <p class="lead">{{ t().contact.lead }}</p>
+      @if (profile()?.availability; as availability) {
+        <p class="availability"><span class="badge badge-live">{{ t().contact.availability }}</span> {{ availability }}</p>
+      }
 
       <ul class="channels">
         @if (profile()?.publicEmail; as email) {
@@ -32,7 +35,7 @@
       </ul>
     </div>
 
-    <div class="card form-card" appReveal>
+    <div class="form-card" appReveal>
       @if (!enabled()) {
         <p class="alert" role="status">{{ t().contact.disabled }}</p>
       } @else if (status() === 'sent') {

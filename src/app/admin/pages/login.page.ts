@@ -76,7 +76,7 @@ export function safeReturnUrl(value: string | undefined | null): string {
     </main>
   `,
   styles: `
-    .login { min-height: 100dvh; display: grid; place-items: center; padding: 1.5rem; background: var(--hero-glow), var(--bg); }
+    .login { min-height: 100dvh; display: grid; place-items: center; padding: 1.5rem; background: var(--band); }
     .panel { width: min(420px, 100%); padding: 2rem; }
     .home { display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 1.25rem; color: var(--text-muted); font-size: 0.88rem; text-decoration: none; }
     h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }

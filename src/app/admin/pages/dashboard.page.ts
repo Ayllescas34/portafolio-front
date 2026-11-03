@@ -58,7 +58,7 @@ interface Tile {
     .tile:hover { border-color: var(--border-strong); }
     .tile app-icon { grid-row: span 2; color: var(--text-faint); }
     .name { font-weight: 600; }
-    .total { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.1; }
+    .total { font-size: 1.5rem; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
     .drafts { grid-column: 2; font-size: 0.82rem; color: var(--warning); }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

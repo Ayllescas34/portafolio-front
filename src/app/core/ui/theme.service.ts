@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { effect, inject, Injectable, signal } from '@angular/core';
+import type { ThemePreference } from '../models/api.models';
 
 export type Theme = 'dark' | 'light';
 const STORAGE_KEY = 'portfolio.theme';
@@ -14,13 +15,14 @@ function readStored(): Theme | null {
 }
 
 /**
- * Dark is the primary experience. The visitor's explicit choice is persisted;
- * without one, the OS preference is respected.
+ * Resolution order: the visitor's explicit choice (persisted) → the site
+ * default configured in the admin panel → the OS preference.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly document = inject(DOCUMENT);
   private readonly explicit = signal<Theme | null>(readStored());
+  private readonly siteDefault = signal<Theme | null>(null);
   private readonly systemPrefersLight = signal(
     typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: light)').matches,
   );
@@ -39,8 +41,14 @@ export class ThemeService {
       const root = this.document.documentElement;
       root.dataset['theme'] = theme;
       root.style.colorScheme = theme;
-      this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0a0d14' : '#f6f7fb');
+      this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0b1220' : '#f6f7f9');
     });
+  }
+
+  /** Applies the default chosen in "Configuración del sitio" (SYSTEM = follow the OS). */
+  useSiteDefault(preference: ThemePreference): void {
+    this.siteDefault.set(preference === 'DARK' ? 'dark' : preference === 'LIGHT' ? 'light' : null);
+    this.theme.set(this.resolve());
   }
 
   toggle(): void {
@@ -55,6 +63,6 @@ export class ThemeService {
   }
 
   private resolve(): Theme {
-    return this.explicit() ?? (this.systemPrefersLight() ? 'light' : 'dark');
+    return this.explicit() ?? this.siteDefault() ?? (this.systemPrefersLight() ? 'light' : 'dark');
   }
 }

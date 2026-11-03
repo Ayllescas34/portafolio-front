@@ -32,6 +32,21 @@ test.describe('Móvil', () => {
     });
   }
 
+  test('en el teléfono no se crea la escena 3D', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('.hero-visual')).toBeHidden();
+    await expect(page.locator('app-hero-scene canvas')).toHaveCount(0);
+  });
+
+  test('el flujo de etapas se apila en vertical', async ({ page }) => {
+    await page.goto('/#capacidades');
+    const items = page.getByRole('list', { name: 'Del desarrollo al despliegue' }).getByRole('listitem');
+    const first = await items.nth(0).boundingBox();
+    const second = await items.nth(1).boundingBox();
+    expect(first && second && second.y > first.y && Math.abs(second.x - first.x) < 2).toBeTruthy();
+  });
+
   test('el menú móvil es accesible por teclado', async ({ page }) => {
     await page.goto('/');
     const toggle = page.getByRole('button', { name: 'Menú' });

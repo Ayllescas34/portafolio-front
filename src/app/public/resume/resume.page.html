@@ -32,6 +32,9 @@
       <section class="cv-section">
         <h2>{{ t().resume.profile }}</h2>
         <p>{{ p.profile.shortBio }}</p>
+        @if (p.profile.tagline) {
+          <p>{{ p.profile.tagline }}</p>
+        }
       </section>
 
       @if (p.experiences.length) {

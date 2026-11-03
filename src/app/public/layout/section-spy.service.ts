@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export const SECTIONS = ['inicio', 'sobre-mi', 'experiencia', 'habilidades', 'proyectos', 'educacion', 'contacto'] as const;
+export const SECTIONS = ['inicio', 'perfil', 'experiencia', 'capacidades', 'proyectos', 'formacion', 'contacto'] as const;
 export type SectionId = (typeof SECTIONS)[number];
 
 /** Tracks which home section is on screen to highlight it in the navigation. */

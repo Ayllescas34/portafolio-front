@@ -1,0 +1,183 @@
+/* Delivery flow — vertical by default (mobile, tablet), horizontal on wide screens. */
+.flow {
+  position: relative;
+  display: grid;
+  gap: 0;
+  margin: 0 0 clamp(3rem, 7vw, 4.5rem);
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: 1rem;
+  padding-bottom: 1.5rem;
+
+  // Connector between consecutive steps.
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: calc(1.125rem - 1px);
+    top: 2.25rem;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-strong);
+  }
+
+  h3 {
+    grid-column: 2;
+    margin: 0.35rem 0 0.25rem;
+    font-size: 1rem;
+  }
+
+  p {
+    grid-column: 2;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+}
+
+.step {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (min-width: 1100px) {
+  .flow {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    // Steps are stretched to the tallest one; keep their content top-aligned.
+    align-content: start;
+    padding-bottom: 0;
+
+    // Horizontal connector from this step to the next one.
+    &:not(:last-child)::before {
+      left: 2.25rem;
+      right: -1.25rem;
+      top: calc(1.125rem - 1px);
+      bottom: auto;
+      width: auto;
+      height: 2px;
+    }
+
+    h3,
+    p {
+      grid-column: 1;
+    }
+
+    h3 {
+      margin-top: 0.9rem;
+    }
+  }
+
+  .step {
+    grid-row: auto;
+  }
+}
+
+/* Skill areas */
+.areas-header {
+  max-width: 760px;
+  margin-bottom: 1.75rem;
+}
+
+.subtitle {
+  margin-bottom: 0.35rem;
+  font-size: 1.35rem;
+}
+
+.areas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 2.5rem;
+}
+
+.area {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+
+  h4 {
+    margin-bottom: 0.35rem;
+    font-size: 1.05rem;
+  }
+}
+
+.area-description {
+  margin-bottom: 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.skills {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  li::before {
+    content: '';
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    transform: translateY(-2px);
+  }
+
+  .featured {
+    font-weight: 600;
+
+    &::before {
+      background: var(--accent);
+    }
+  }
+}
+
+.skill-note {
+  font-size: 0.84rem;
+  font-weight: 400;
+  color: var(--text-faint);
+
+  &::before {
+    content: '— ';
+  }
+}
+
+@media (max-width: 1000px) {
+  .areas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .areas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiError } from '../../core/http/api-error';
-import type { ApiResponse, ProjectCategory } from '../../core/models/api.models';
+import type { ApiResponse, ProjectCategory, ProjectKind } from '../../core/models/api.models';
 import type { ContactMessageInput, Portfolio, Project } from '../../core/models/portfolio.models';
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
@@ -51,10 +51,15 @@ export class PortfolioStore {
     return this.pending;
   }
 
-  async projects(filters: { technology?: string | null; category?: ProjectCategory | null }): Promise<Project[]> {
+  async projects(filters: {
+    technology?: string | null;
+    category?: ProjectCategory | null;
+    kind?: ProjectKind | null;
+  }): Promise<Project[]> {
     const params: Record<string, string> = {};
     if (filters.technology) params['technology'] = filters.technology;
     if (filters.category) params['category'] = filters.category;
+    if (filters.kind) params['kind'] = filters.kind;
     const res = await firstValueFrom(this.http.get<ApiResponse<Project[]>>('/api/public/projects', { params }));
     return res.data;
   }

@@ -67,11 +67,30 @@ export class HomePage {
     effect(() => {
       const portfolio = this.store.portfolio();
       if (!portfolio) return;
+      const { profile } = portfolio;
+      // Keywords come from published content only (role, featured skills, technologies in use).
+      const keywords = [
+        profile.professionalTitle,
+        ...this.store.featuredSkills().map((s) => s.name),
+        ...portfolio.projectFilters.technologies.slice(0, 6).map((t) => t.name),
+      ];
       seo.set({
         title: portfolio.site.siteTitle,
         description: portfolio.site.siteDescription,
-        image: portfolio.site.ogImageUrl ?? portfolio.profile.profileImageUrl,
+        image: portfolio.site.ogImageUrl ?? profile.profileImageUrl,
         type: 'profile',
+        keywords,
+      });
+      seo.setPerson({
+        name: profile.fullName,
+        jobTitle: profile.professionalTitle,
+        description: profile.shortBio,
+        email: profile.publicEmail,
+        location: profile.location,
+        worksFor: this.store.currentExperience()?.company ?? null,
+        sameAs: portfolio.socialLinks.map((l) => l.url),
+        knowsAbout: this.store.featuredSkills().map((s) => s.name),
+        image: profile.profileImageUrl,
       });
     });
 

@@ -18,27 +18,12 @@
       @if (project(); as p) {
         <article aria-labelledby="project-title">
           <header class="head">
-            <div class="tags">
-              <span class="chip">{{ t().enums.projectCategory[p.category] }}</span>
-              <span class="badge">{{ t().enums.projectStatus[p.status] }}</span>
-              @if (p.startDate) {
-                <span class="mono period">{{ { startDate: p.startDate, endDate: p.endDate, datePrecision: 'MONTH' } | period }}</span>
-              }
-            </div>
+            <p class="eyebrow">{{ t().enums.projectKind[p.kind] }}</p>
             <h1 id="project-title">{{ p.title }}</h1>
             <p class="lead">{{ p.shortDescription }}</p>
-            <div class="links">
-              @if (p.liveUrl) {
-                <a class="btn btn-primary" [href]="p.liveUrl" target="_blank" rel="noopener noreferrer">
-                  {{ t().projects.live }}<app-icon name="external" /><span class="visually-hidden">(pestaña nueva)</span>
-                </a>
-              }
-              @if (p.repositoryUrl) {
-                <a class="btn" [href]="p.repositoryUrl" target="_blank" rel="noopener noreferrer">
-                  <app-icon name="github" />{{ t().projects.repository }}<span class="visually-hidden">(pestaña nueva)</span>
-                </a>
-              }
-            </div>
+            @if (p.kind === 'PROFESSIONAL') {
+              <p class="confidential"><app-icon name="alert" [size]="16" />{{ t().projects.confidential }}</p>
+            }
           </header>
 
           @if (p.coverImageUrl) {
@@ -47,23 +32,22 @@
 
           <div class="layout">
             <div class="main">
-              @if (p.problem) {
+              @for (block of blocks(); track block.title) {
                 <section class="block">
-                  <h2>{{ t().projects.problem }}</h2>
-                  <p>{{ p.problem }}</p>
-                </section>
-              }
-              @if (p.solution) {
-                <section class="block">
-                  <h2>{{ t().projects.solution }}</h2>
-                  <p>{{ p.solution }}</p>
-                </section>
-              }
-              @if (p.fullDescription) {
-                <section class="block prose">
-                  @for (paragraph of p.fullDescription.split('\n\n'); track $index) {
+                  <h2>{{ block.title }}</h2>
+                  @for (paragraph of block.paragraphs; track $index) {
                     <p>{{ paragraph }}</p>
                   }
+                </section>
+              }
+              @if (p.responsibilities.length) {
+                <section class="block">
+                  <h2>{{ t().projects.participation }}</h2>
+                  <ul class="bullets">
+                    @for (line of p.responsibilities; track $index) {
+                      <li>{{ line }}</li>
+                    }
+                  </ul>
                 </section>
               }
               @if (p.images.length) {
@@ -85,26 +69,44 @@
               }
             </div>
 
-            <aside class="card aside">
-              @if (p.role) {
-                <h2 class="aside-title">{{ t().projects.role }}</h2>
-                <p>{{ p.role }}</p>
-              }
-              @if (p.responsibilities.length) {
-                <h2 class="aside-title">{{ t().projects.responsibilities }}</h2>
-                <ul class="bullets">
-                  @for (line of p.responsibilities; track $index) {
-                    <li>{{ line }}</li>
+            <aside class="aside" [attr.aria-label]="t().projects.facts">
+              <dl class="facts">
+                @if (p.role) {
+                  <div><dt>{{ t().projects.role }}</dt><dd>{{ p.role }}</dd></div>
+                }
+                <div><dt>{{ t().projects.status }}</dt><dd>{{ t().enums.projectStatus[p.status] }}</dd></div>
+                @if (p.startDate) {
+                  <div>
+                    <dt>{{ t().projects.period }}</dt>
+                    <dd class="period">{{ { startDate: p.startDate, endDate: p.endDate, datePrecision: 'MONTH', isCurrent: !p.endDate && p.status === 'IN_PROGRESS' } | period }}</dd>
+                  </div>
+                }
+                @if (p.technologies.length) {
+                  <div>
+                    <dt>{{ t().projects.technologies }}</dt>
+                    <dd>
+                      <ul class="chip-list">
+                        @for (tech of p.technologies; track tech.id) {
+                          <li class="chip">{{ tech.name }}</li>
+                        }
+                      </ul>
+                    </dd>
+                  </div>
+                }
+              </dl>
+              @if (p.liveUrl || p.repositoryUrl) {
+                <div class="links">
+                  @if (p.liveUrl) {
+                    <a class="btn btn-primary" [href]="p.liveUrl" target="_blank" rel="noopener noreferrer">
+                      {{ t().projects.live }}<app-icon name="external" /><span class="visually-hidden">(pestaña nueva)</span>
+                    </a>
                   }
-                </ul>
-              }
-              @if (p.technologies.length) {
-                <h2 class="aside-title">{{ t().projects.technologies }}</h2>
-                <ul class="chip-list">
-                  @for (tech of p.technologies; track tech.id) {
-                    <li class="chip">{{ tech.name }}</li>
+                  @if (p.repositoryUrl) {
+                    <a class="btn" [href]="p.repositoryUrl" target="_blank" rel="noopener noreferrer">
+                      <app-icon name="github" />{{ t().projects.repository }}<span class="visually-hidden">(pestaña nueva)</span>
+                    </a>
                   }
-                </ul>
+                </div>
               }
             </aside>
           </div>

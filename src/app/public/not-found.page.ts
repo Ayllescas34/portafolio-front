@@ -8,7 +8,7 @@ import { SeoService } from '../core/seo/seo.service';
   imports: [RouterLink],
   template: `
     <div class="container page">
-      <p class="code mono" aria-hidden="true">404</p>
+      <p class="code tabular" aria-hidden="true">404</p>
       <h1>{{ t().notFound.title }}</h1>
       <p class="muted">{{ t().notFound.body }}</p>
       <a class="btn btn-primary" routerLink="/">{{ t().notFound.home }}</a>

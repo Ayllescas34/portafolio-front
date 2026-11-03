@@ -4,34 +4,35 @@ import type { HighlightKind } from '../../../core/models/api.models';
 import { RevealDirective } from '../../../shared/ui/reveal.directive';
 import { PortfolioStore } from '../../data/portfolio.store';
 
-const ORDER: HighlightKind[] = ['WORK_STYLE', 'VALUE', 'INTEREST'];
+/** Delivery stages have their own section; this one shows how I work and what I bring. */
+const ORDER: Exclude<HighlightKind, 'DELIVERY_STAGE'>[] = ['WORK_STYLE', 'VALUE', 'INTEREST'];
 
 @Component({
   selector: 'app-about-section',
   imports: [RevealDirective],
   template: `
-    <section id="sobre-mi" class="section" aria-labelledby="about-title">
-      <div class="container about">
-        <header class="section-header" appReveal>
+    <section id="perfil" class="section" aria-labelledby="about-title">
+      <div class="container layout">
+        <div class="intro" appReveal>
           <p class="eyebrow">{{ t().about.eyebrow }}</p>
           <h2 id="about-title" class="section-title">{{ t().about.title }}</h2>
           @for (paragraph of paragraphs(); track $index) {
-            <p class="lead">{{ paragraph }}</p>
+            <p class="paragraph">{{ paragraph }}</p>
           }
-        </header>
+        </div>
 
         <div class="groups">
           @for (group of groups(); track group.kind) {
             <div class="group" appReveal>
-              <h3 class="group-title mono">{{ t().about[group.kind] }}</h3>
-              <ul>
+              <h3 class="group-title">{{ t().about[group.kind] }}</h3>
+              <dl>
                 @for (item of group.items; track item.id) {
-                  <li class="card item">
-                    <h4>{{ item.title }}</h4>
-                    <p>{{ item.description }}</p>
-                  </li>
+                  <div class="item">
+                    <dt>{{ item.title }}</dt>
+                    <dd>{{ item.description }}</dd>
+                  </div>
                 }
-              </ul>
+              </dl>
             </div>
           }
         </div>
@@ -39,13 +40,17 @@ const ORDER: HighlightKind[] = ['WORK_STYLE', 'VALUE', 'INTEREST'];
     </section>
   `,
   styles: `
-    .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-    .group-title { margin-bottom: 1rem; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); }
-    ul { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
-    .item { padding: 1.25rem 1.35rem; transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease); }
-    .item:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-    h4 { margin-bottom: 0.35rem; font-size: 1.08rem; }
-    .item p { margin: 0; color: var(--text-muted); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 5rem); align-items: start; }
+    .paragraph { max-width: var(--measure); color: var(--text-muted); font-size: 1.04rem; }
+    .paragraph:first-of-type { color: var(--text); }
+    .groups { display: grid; gap: 2.25rem; padding-top: 0.4rem; }
+    .group-title { margin-bottom: 0.25rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+    dl { margin: 0; }
+    .item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .item:last-child { border-bottom: 0; }
+    dt { margin-bottom: 0.25rem; font-weight: 600; }
+    dd { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+    @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -54,7 +59,10 @@ export class AboutSectionComponent {
   protected readonly t = inject(I18nService).t;
 
   protected readonly paragraphs = computed(() =>
-    (this.store.profile()?.longBio ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
+    (this.store.profile()?.longBio ?? '')
+      .split(/\n{2,}/)
+      .map((p) => p.trim())
+      .filter(Boolean),
   );
 
   protected readonly groups = computed(() => {

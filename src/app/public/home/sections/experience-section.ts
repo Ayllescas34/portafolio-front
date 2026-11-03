@@ -8,7 +8,7 @@ import { PortfolioStore } from '../../data/portfolio.store';
   selector: 'app-experience-section',
   imports: [PeriodPipe, RevealDirective],
   template: `
-    <section id="experiencia" class="section" aria-labelledby="experience-title">
+    <section id="experiencia" class="section section-band" aria-labelledby="experience-title">
       <div class="container">
         <header class="section-header" appReveal>
           <p class="eyebrow">{{ t().experience.eyebrow }}</p>
@@ -20,23 +20,24 @@ import { PortfolioStore } from '../../data/portfolio.store';
             @for (item of items(); track item.id) {
               <li class="entry" [class.current]="item.isCurrent" appReveal>
                 <div class="when">
-                  <span class="period mono">{{ item | period }}</span>
+                  <span class="period tabular">{{ item | period }}</span>
                   <span class="duration">{{ item.duration }}</span>
                 </div>
-                <span class="dot" aria-hidden="true"></span>
-                <article class="card body">
-                  <header>
+                <article class="body">
+                  <div class="title-row">
                     <h3>{{ item.position }}</h3>
-                    <p class="company">
-                      {{ item.company }}
-                      @if (item.location) {
-                        <span class="muted"> · {{ item.location }}</span>
-                      }
-                    </p>
+                    @if (item.isCurrent) {
+                      <span class="badge badge-live">{{ t().experience.current }}</span>
+                    }
+                  </div>
+                  <p class="company">
+                    {{ item.company }}
+                    @if (item.location) {
+                      <span> · {{ item.location }}</span>
+                    }
+                  </p>
+                  @if (item.employmentType || item.workMode) {
                     <ul class="chip-list meta">
-                      @if (item.isCurrent) {
-                        <li class="badge badge-live">{{ t().experience.current }}</li>
-                      }
                       @if (item.employmentType) {
                         <li class="chip">{{ t().enums.employmentType[item.employmentType] }}</li>
                       }
@@ -44,14 +45,14 @@ import { PortfolioStore } from '../../data/portfolio.store';
                         <li class="chip">{{ t().enums.workMode[item.workMode] }}</li>
                       }
                     </ul>
-                  </header>
+                  }
 
                   @if (item.summary) {
                     <p class="summary">{{ item.summary }}</p>
                   }
                   @if (item.responsibilities.length) {
-                    <h4 class="visually-hidden">{{ t().experience.responsibilities }}</h4>
-                    <ul class="bullets">
+                    <h4 class="label">{{ t().experience.responsibilities }}</h4>
+                    <ul class="bullets" [class.single]="item.responsibilities.length < 4">
                       @for (line of item.responsibilities; track $index) {
                         <li>{{ line }}</li>
                       }
@@ -59,7 +60,7 @@ import { PortfolioStore } from '../../data/portfolio.store';
                   }
                   @if (item.achievements.length) {
                     <h4 class="label">{{ t().experience.achievements }}</h4>
-                    <ul class="bullets achievements">
+                    <ul class="bullets single">
                       @for (line of item.achievements; track $index) {
                         <li>{{ line }}</li>
                       }

@@ -7,6 +7,7 @@ import { portfolioFixture, projectFixture } from '../../../testing/fixtures';
 import { PortfolioStore } from '../../data/portfolio.store';
 import { ContactSectionComponent } from './contact-section';
 import { ProjectsSectionComponent } from './projects-section';
+import { SkillsSectionComponent } from './skills-section';
 
 function setup() {
   TestBed.configureTestingModule({
@@ -64,7 +65,7 @@ describe('ContactSectionComponent', () => {
     req.flush({ data: { received: true } }, { status: 202, statusText: 'Accepted' });
     await promise;
     fixture.detectChanges();
-    expect(el.querySelector('[role="status"]')?.textContent).toContain('Tu mensaje fue recibido');
+    expect(el.querySelector('[role="status"]')?.textContent).toContain('Su mensaje fue recibido');
   });
 
   it('shows the server error and maps field messages', async () => {
@@ -84,6 +85,22 @@ describe('ContactSectionComponent', () => {
     const honeypot = el.querySelector<HTMLInputElement>('#contact-website')!;
     expect(honeypot.tabIndex).toBe(-1);
     expect(honeypot.closest('[aria-hidden="true"]')).not.toBeNull();
+  });
+});
+
+describe('SkillsSectionComponent', () => {
+  it('renders the delivery flow as an ordered list and skills by area, without percentages', () => {
+    const backend = setup();
+    const fixture = TestBed.createComponent(SkillsSectionComponent);
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    const steps = [...el.querySelectorAll('ol.flow > li h3')].map((h) => h.textContent?.replace(/\s+/g, ' ').trim());
+    expect(steps).toEqual(['Etapa 1: Pruebas', 'Etapa 2: Despliegue y validación']);
+    expect(el.querySelector('.area h4')?.textContent).toContain('Backend');
+    expect(el.querySelector('.featured')?.textContent).toContain('NestJS');
+    expect(el.textContent).not.toContain('%');
+    backend.verify();
   });
 });
 
@@ -119,6 +136,20 @@ describe('ProjectsSectionComponent', () => {
     expect(button.getAttribute('aria-pressed')).toBe('true');
     expect(fixture.nativeElement.querySelector('.results').textContent).toContain('1 proyecto');
     expect(fixture.nativeElement.querySelector('.grid').textContent).toContain('Filtrado');
+  });
+
+  it('filters by project kind, professional cases first', async () => {
+    const buttons = [...fixture.nativeElement.querySelectorAll('[aria-label="Filtrar por tipo"] button')] as HTMLButtonElement[];
+    expect(buttons.map((b) => b.textContent?.trim().replace(/\s+\d+$/, ''))).toEqual([
+      'Todos',
+      'Caso profesional',
+      'Proyecto personal',
+    ]);
+    buttons[1].click();
+    const req = backend.expectOne((r) => r.url === '/api/public/projects');
+    expect(req.request.params.get('kind')).toBe('PROFESSIONAL');
+    req.flush({ data: [] });
+    await fixture.whenStable();
   });
 
   it('shows an error state with retry when filtering fails', async () => {

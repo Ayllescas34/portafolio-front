@@ -1,12 +1,11 @@
 import {
-  AdditiveBlending,
   BufferGeometry,
   CanvasTexture,
   Color,
   Float32BufferAttribute,
   Group,
-  IcosahedronGeometry,
   LineBasicMaterial,
+  LineLoop,
   LineSegments,
   PerspectiveCamera,
   Points,
@@ -14,14 +13,13 @@ import {
   Scene,
   Vector3,
   WebGLRenderer,
-  WireframeGeometry,
 } from 'three';
 
 export interface ScenePalette {
   node: string;
   edge: string;
   pulse: string;
-  core: string;
+  plane: string;
 }
 
 export interface SceneOptions {
@@ -41,7 +39,12 @@ export interface NetworkScene {
 
 export type NetworkSceneFactory = (container: HTMLElement, options: SceneOptions) => NetworkScene;
 
-/** Deterministic PRNG so the network looks the same on every visit. */
+/** Interface → services → data → tests → deployment, top to bottom. */
+const LAYER_COUNT = 5;
+const LAYER_GAP = 0.78;
+const LAYER_RADIUS = 1.75;
+
+/** Deterministic PRNG so the structure looks the same on every visit. */
 function random(seed: number): () => number {
   return () => {
     seed = (seed * 1664525 + 1013904223) % 4294967296;
@@ -56,7 +59,7 @@ function dotTexture(): CanvasTexture {
   const ctx = canvas.getContext('2d')!;
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.35, 'rgba(255,255,255,0.85)');
+  gradient.addColorStop(0.55, 'rgba(255,255,255,0.9)');
   gradient.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
@@ -64,89 +67,93 @@ function dotTexture(): CanvasTexture {
 }
 
 /**
- * A slowly rotating graph of nodes (systems) linked by edges (integrations),
- * with small pulses travelling along the edges (data flowing between them).
+ * A calm, layered system diagram: five stacked rings of nodes (one per
+ * delivery layer), linked vertically. Small pulses travel down the layers,
+ * from the interface to deployment. Slow rotation, no glow, no bloom.
  */
 export const createNetworkScene: NetworkSceneFactory = (container, options) => {
   const rand = random(20260201);
-  const nodeCount = options.compact ? 46 : 84;
-  const pulseCount = options.compact ? 8 : 16;
-  const radius = 2.25;
+  const perLayer = options.compact ? 6 : 8;
+  const pulseCount = options.compact ? 4 : 7;
 
-  // ── Nodes on a jittered Fibonacci sphere ─────────────────────────────────
-  const nodes: Vector3[] = [];
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < nodeCount; i++) {
-    const y = 1 - (i / (nodeCount - 1)) * 2;
-    const r = Math.sqrt(1 - y * y);
-    const theta = golden * i;
-    const jitter = 0.82 + rand() * 0.3;
-    nodes.push(new Vector3(Math.cos(theta) * r, y, Math.sin(theta) * r).multiplyScalar(radius * jitter));
+  // ── Geometry ─────────────────────────────────────────────────────────────
+  const layers: Vector3[][] = [];
+  for (let l = 0; l < LAYER_COUNT; l++) {
+    const y = ((LAYER_COUNT - 1) / 2 - l) * LAYER_GAP;
+    // Nodes share their angle across layers: links read as clean vertical columns.
+    const offset = 0;
+    layers.push(
+      Array.from({ length: perLayer }, (_, i) => {
+        const angle = offset + (i / perLayer) * Math.PI * 2;
+        const r = LAYER_RADIUS * (0.94 + rand() * 0.08);
+        return new Vector3(Math.cos(angle) * r, y, Math.sin(angle) * r);
+      }),
+    );
   }
+  const nodes = layers.flat();
+  const indexOf = (l: number, i: number) => l * perLayer + i;
 
-  // ── Edges: each node to its 3 nearest neighbours (deduplicated) ──────────
-  const edgeKeys = new Set<string>();
-  const edges: [number, number][] = [];
-  const adjacency: number[][] = nodes.map(() => []);
-  nodes.forEach((node, i) => {
-    nodes
-      .map((other, j) => ({ j, d: i === j ? Infinity : node.distanceToSquared(other) }))
-      .sort((a, b) => a.d - b.d)
-      .slice(0, 3)
-      .forEach(({ j }) => {
-        const key = i < j ? `${i}-${j}` : `${j}-${i}`;
-        if (edgeKeys.has(key)) return;
-        edgeKeys.add(key);
-        edges.push([i, j]);
-        adjacency[i].push(j);
-        adjacency[j].push(i);
-      });
-  });
+  // Vertical links: each node to the node at the same position one layer below.
+  const down: number[][] = nodes.map(() => []);
+  const vertical: [number, number][] = [];
+  for (let l = 0; l < LAYER_COUNT - 1; l++) {
+    for (let i = 0; i < perLayer; i++) {
+      const from = indexOf(l, i);
+      const to = indexOf(l + 1, i);
+      vertical.push([from, to]);
+      down[from].push(to);
+    }
+  }
 
   // ── Three.js objects ─────────────────────────────────────────────────────
   const scene = new Scene();
-  const camera = new PerspectiveCamera(42, 1, 0.1, 50);
-  camera.position.set(0, 0, 7.4);
+  // Slightly elevated: every layer reads as an ellipse, none is seen edge-on.
+  const camera = new PerspectiveCamera(36, 1, 0.1, 50);
+  camera.position.set(0, 3.6, 7.4);
+  camera.lookAt(0, -0.15, 0);
 
-  const renderer = new WebGLRenderer({ antialias: !options.compact, alpha: true, powerPreference: 'low-power' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, options.compact ? 1.5 : 2));
+  const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
   renderer.setClearColor(0x000000, 0);
   renderer.domElement.setAttribute('aria-hidden', 'true');
   container.appendChild(renderer.domElement);
 
   const group = new Group();
   scene.add(group);
-
   const texture = dotTexture();
 
+  // Thin rings: one "plane" per layer.
+  const planeMaterial = new LineBasicMaterial({ transparent: true, opacity: 0.35, depthWrite: false });
+  const planeGeometries: BufferGeometry[] = [];
+  for (let l = 0; l < LAYER_COUNT; l++) {
+    const y = layers[l][0].y;
+    const points = Array.from({ length: 72 }, (_, i) => {
+      const a = (i / 72) * Math.PI * 2;
+      return new Vector3(Math.cos(a) * LAYER_RADIUS * 1.12, y, Math.sin(a) * LAYER_RADIUS * 1.12);
+    });
+    const geometry = new BufferGeometry().setFromPoints(points);
+    planeGeometries.push(geometry);
+    group.add(new LineLoop(geometry, planeMaterial));
+  }
+
   const nodeGeometry = new BufferGeometry().setFromPoints(nodes);
-  const nodeMaterial = new PointsMaterial({ size: 0.11, map: texture, transparent: true, depthWrite: false });
+  const nodeMaterial = new PointsMaterial({ size: 0.12, map: texture, transparent: true, depthWrite: false });
   group.add(new Points(nodeGeometry, nodeMaterial));
 
-  const edgeGeometry = new BufferGeometry().setFromPoints(edges.flatMap(([a, b]) => [nodes[a], nodes[b]]));
-  const edgeMaterial = new LineBasicMaterial({ transparent: true, opacity: 0.32, depthWrite: false });
+  const edgeGeometry = new BufferGeometry().setFromPoints(vertical.flatMap(([a, b]) => [nodes[a], nodes[b]]));
+  const edgeMaterial = new LineBasicMaterial({ transparent: true, opacity: 0.4, depthWrite: false });
   group.add(new LineSegments(edgeGeometry, edgeMaterial));
 
-  const coreGeometry = new WireframeGeometry(new IcosahedronGeometry(0.95, 1));
-  const coreMaterial = new LineBasicMaterial({ transparent: true, opacity: 0.22, depthWrite: false });
-  const core = new LineSegments(coreGeometry, coreMaterial);
-  group.add(core);
-
-  // Pulses: each travels along an edge, then hops to a neighbouring edge.
-  const pulses = Array.from({ length: pulseCount }, () => {
-    const [from, to] = edges[Math.floor(rand() * edges.length)];
-    return { from, to, t: rand(), speed: 0.25 + rand() * 0.35 };
-  });
+  // Pulses descend through the layers and restart at the top.
+  const startPulse = () => {
+    const from = indexOf(0, Math.floor(rand() * perLayer));
+    return { from, to: down[from][0], t: rand(), speed: 0.16 + rand() * 0.12 };
+  };
+  const pulses = Array.from({ length: pulseCount }, startPulse);
   const pulsePositions = new Float32Array(pulseCount * 3);
   const pulseGeometry = new BufferGeometry();
   pulseGeometry.setAttribute('position', new Float32BufferAttribute(pulsePositions, 3));
-  const pulseMaterial = new PointsMaterial({
-    size: 0.2,
-    map: texture,
-    transparent: true,
-    depthWrite: false,
-    blending: AdditiveBlending,
-  });
+  const pulseMaterial = new PointsMaterial({ size: 0.16, map: texture, transparent: true, depthWrite: false });
   const pulsePoints = new Points(pulseGeometry, pulseMaterial);
   group.add(pulsePoints);
 
@@ -154,7 +161,7 @@ export const createNetworkScene: NetworkSceneFactory = (container, options) => {
     nodeMaterial.color = new Color(palette.node);
     edgeMaterial.color = new Color(palette.edge);
     pulseMaterial.color = new Color(palette.pulse);
-    coreMaterial.color = new Color(palette.core);
+    planeMaterial.color = new Color(palette.plane);
   };
   applyPalette(options.palette);
 
@@ -163,19 +170,18 @@ export const createNetworkScene: NetworkSceneFactory = (container, options) => {
   let active = false;
   let frame = 0;
   let last = 0;
-  const pointer = { x: 0, y: 0 };
-  const tilt = { x: 0, y: 0 };
+  const pointer = { x: 0 };
+  let tilt = 0;
   const scratch = new Vector3();
-  group.rotation.set(0.35, -0.6, 0);
+  group.rotation.y = -0.4;
 
   const updatePulses = (dt: number) => {
     pulses.forEach((pulse, i) => {
       pulse.t += dt * pulse.speed;
       if (pulse.t >= 1) {
-        const next = adjacency[pulse.to];
-        pulse.from = pulse.to;
-        pulse.to = next[Math.floor(rand() * next.length)] ?? pulse.from;
-        pulse.t = 0;
+        const next = down[pulse.to];
+        if (next.length) Object.assign(pulse, { from: pulse.to, to: next[0], t: 0 });
+        else Object.assign(pulse, startPulse(), { t: 0 });
       }
       scratch.lerpVectors(nodes[pulse.from], nodes[pulse.to], pulse.t);
       pulsePositions.set([scratch.x, scratch.y, scratch.z], i * 3);
@@ -189,14 +195,9 @@ export const createNetworkScene: NetworkSceneFactory = (container, options) => {
     // Clamp so a long pause (tab switch) never produces a jump.
     const dt = last ? Math.min((time - last) / 1000, 0.05) : 0;
     last = time;
-    group.rotation.y += dt * 0.07;
-    core.rotation.y -= dt * 0.12;
-    core.rotation.x += dt * 0.04;
-    // Gentle parallax towards the pointer, eased so it never feels jumpy.
-    tilt.x += (pointer.y * 0.22 - tilt.x) * Math.min(1, dt * 2.5);
-    tilt.y += (pointer.x * 0.3 - tilt.y) * Math.min(1, dt * 2.5);
-    group.rotation.x = 0.35 + tilt.x;
-    group.position.x = tilt.y * 0.25;
+    tilt += (pointer.x * 0.12 - tilt) * Math.min(1, dt * 2);
+    group.rotation.y += dt * 0.045;
+    group.rotation.z = tilt * 0.15;
     updatePulses(dt);
     render();
     frame = requestAnimationFrame(tick);
@@ -204,7 +205,6 @@ export const createNetworkScene: NetworkSceneFactory = (container, options) => {
 
   const onPointerMove = (event: PointerEvent) => {
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = (event.clientY / window.innerHeight) * 2 - 1;
   };
 
   const start = () => {
@@ -257,15 +257,13 @@ export const createNetworkScene: NetworkSceneFactory = (container, options) => {
       if (!width || !height) return;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      // Keep the whole network in view on narrow (portrait) containers.
-      camera.position.z = camera.aspect < 1 ? 7.4 / Math.max(camera.aspect, 0.6) : 7.4;
       camera.updateProjectionMatrix();
       if (!frame) render();
     },
     dispose() {
       stop();
-      [nodeGeometry, edgeGeometry, coreGeometry, pulseGeometry].forEach((g) => g.dispose());
-      [nodeMaterial, edgeMaterial, coreMaterial, pulseMaterial].forEach((m) => m.dispose());
+      [nodeGeometry, edgeGeometry, pulseGeometry, ...planeGeometries].forEach((g) => g.dispose());
+      [nodeMaterial, edgeMaterial, pulseMaterial, planeMaterial].forEach((m) => m.dispose());
       texture.dispose();
       renderer.dispose();
       renderer.domElement.remove();

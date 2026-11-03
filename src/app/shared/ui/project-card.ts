@@ -4,43 +4,35 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import type { Project } from '../../core/models/portfolio.models';
 import { IconComponent, IconName } from './icon';
 
-const CATEGORY_ICON: Record<Project['category'], IconName> = {
-  WEB_APP: 'globe',
-  MOBILE_APP: 'phone',
-  API: 'code',
-  DATABASE: 'database',
-  DESKTOP: 'grid',
-  TOOL: 'settings',
-  OTHER: 'layers',
+const KIND_ICON: Record<Project['kind'], IconName> = {
+  PROFESSIONAL: 'briefcase',
+  PERSONAL: 'code',
+  ACADEMIC: 'graduation',
+  DEMO: 'layers',
 };
 
 export type ProjectCardData = Pick<
   Project,
-  'title' | 'slug' | 'shortDescription' | 'category' | 'status' | 'coverImageUrl' | 'coverImageAlt' | 'technologies' | 'isFeatured'
+  'title' | 'slug' | 'shortDescription' | 'kind' | 'status' | 'coverImageUrl' | 'coverImageAlt' | 'technologies' | 'isFeatured'
 > &
-  Partial<Pick<Project, 'problem' | 'solution' | 'role'>>;
+  Partial<Pick<Project, 'context' | 'solution' | 'role' | 'responsibilities'>>;
 
-/** Used by the public grid, the featured slot and the admin live preview. */
+/** Case-study card used by the public grid, the featured slot and the admin live preview. */
 @Component({
   selector: 'app-project-card',
   imports: [RouterLink, IconComponent],
   template: `
     @let p = project();
-    <article class="card project" [class.featured]="variant() === 'featured'">
-      <div class="media">
-        @if (p.coverImageUrl) {
+    <article class="project" [class.featured]="variant() === 'featured'" [class.with-media]="!!p.coverImageUrl">
+      @if (p.coverImageUrl) {
+        <div class="media">
           <img [src]="p.coverImageUrl" [alt]="p.coverImageAlt ?? ''" loading="lazy" decoding="async" width="640" height="360" />
-        } @else {
-          <div class="placeholder" aria-hidden="true">
-            <app-icon [name]="icon()" [size]="40" />
-            <span class="mono">{{ p.slug }}</span>
-          </div>
-        }
-      </div>
+        </div>
+      }
       <div class="content">
         <div class="tags">
-          <span class="chip">{{ t().enums.projectCategory[p.category] }}</span>
-          <span class="badge">{{ t().enums.projectStatus[p.status] }}</span>
+          <span class="kind"><app-icon [name]="icon()" [size]="15" />{{ t().enums.projectKind[p.kind] }}</span>
+          <span class="status">{{ t().enums.projectStatus[p.status] }}</span>
         </div>
         <h3>
           @if (linkable()) {
@@ -53,26 +45,43 @@ export type ProjectCardData = Pick<
 
         @if (variant() === 'featured') {
           <dl class="facts">
-            @if (p.problem) {
-              <div><dt>{{ t().projects.problem }}</dt><dd>{{ p.problem }}</dd></div>
+            @if (p.context) {
+              <div><dt>{{ t().projects.context }}</dt><dd>{{ p.context }}</dd></div>
             }
             @if (p.solution) {
               <div><dt>{{ t().projects.solution }}</dt><dd>{{ p.solution }}</dd></div>
             }
+            @if (participation().length) {
+              <div>
+                <dt>{{ t().projects.participation }}</dt>
+                <dd>
+                  <ul class="participation">
+                    @for (line of participation(); track $index) {
+                      <li>{{ line }}</li>
+                    }
+                  </ul>
+                </dd>
+              </div>
+            }
           </dl>
         }
 
-        <ul class="chip-list" [attr.aria-label]="t().projects.technologies">
-          @for (tech of visibleTech(); track tech.slug) {
-            <li class="chip">{{ tech.name }}</li>
+        <div class="footer">
+          @if (p.role) {
+            <p class="role"><span>{{ t().projects.role }}:</span> {{ p.role }}</p>
           }
-          @if (hiddenTech() > 0) {
-            <li class="chip">+{{ hiddenTech() }}</li>
+          <ul class="tech" [attr.aria-label]="t().projects.technologies">
+            @for (tech of visibleTech(); track tech.slug) {
+              <li>{{ tech.name }}</li>
+            }
+            @if (hiddenTech() > 0) {
+              <li>+{{ hiddenTech() }}</li>
+            }
+          </ul>
+          @if (linkable()) {
+            <span class="more" aria-hidden="true">{{ t().projects.details }} <app-icon name="arrow-right" [size]="16" /></span>
           }
-        </ul>
-        @if (linkable()) {
-          <span class="more" aria-hidden="true">{{ t().projects.details }} <app-icon name="arrow-right" [size]="16" /></span>
-        }
+        </div>
       </div>
     </article>
   `,
@@ -88,5 +97,6 @@ export class ProjectCardComponent {
   private readonly limit = computed(() => (this.variant() === 'featured' ? 10 : 5));
   protected readonly visibleTech = computed(() => this.project().technologies.slice(0, this.limit()));
   protected readonly hiddenTech = computed(() => Math.max(0, this.project().technologies.length - this.limit()));
-  protected readonly icon = computed(() => CATEGORY_ICON[this.project().category]);
+  protected readonly participation = computed(() => (this.project().responsibilities ?? []).slice(0, 5));
+  protected readonly icon = computed(() => KIND_ICON[this.project().kind]);
 }

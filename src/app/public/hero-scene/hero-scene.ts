@@ -33,21 +33,27 @@ export const WEBGL_SUPPORT = new InjectionToken<() => boolean>('WEBGL_SUPPORT', 
   },
 });
 
+/** The 3D accent is desktop-only: on phones and small tablets no WebGL context is created. */
+export const SCENE_VIEWPORT = new InjectionToken<MediaQueryList | null>('SCENE_VIEWPORT', {
+  providedIn: 'root',
+  factory: () => (typeof matchMedia === 'function' ? matchMedia('(min-width: 901px)') : null),
+});
+
 function readPalette(element: HTMLElement): ScenePalette {
   const styles = getComputedStyle(element);
   const v = (name: string, fallback: string) => styles.getPropertyValue(name).trim() || fallback;
   return {
-    node: v('--accent', '#5eead4'),
-    edge: v('--accent-2', '#a5b4fc'),
-    pulse: v('--accent', '#5eead4'),
-    core: v('--accent-2', '#a5b4fc'),
+    node: v('--accent', '#6ea8fe'),
+    pulse: v('--accent-2', '#4fb6c2'),
+    edge: v('--text-faint', '#8392ab'),
+    plane: v('--border-strong', '#31446a'),
   };
 }
 
 /**
- * Decorative 3D network for the hero. Purely visual (aria-hidden); every piece
- * of information around it is regular HTML. Falls back to a static SVG when
- * WebGL is unavailable or the context is lost.
+ * Decorative layered-system diagram for the hero (aria-hidden). Every piece of
+ * information around it is regular HTML. Falls back to a static SVG when WebGL
+ * is unavailable or the context is lost.
  */
 @Component({
   selector: 'app-hero-scene',
@@ -55,12 +61,19 @@ function readPalette(element: HTMLElement): ScenePalette {
     <div class="scene" #host aria-hidden="true" [attr.data-mode]="mode()">
       @if (mode() === 'fallback') {
         <svg class="fallback" viewBox="0 0 400 400" role="presentation">
-          <g class="edges">
-            <path d="M90 140 L200 80 L310 150 L280 270 L170 310 L95 250 Z M200 80 L200 200 L310 150 M200 200 L280 270 M200 200 L170 310 M200 200 L95 250 M200 200 L90 140" />
+          @for (y of fallbackLayers; track y) {
+            <ellipse class="plane" cx="200" [attr.cy]="y" rx="150" ry="34" />
+          }
+          <g class="links">
+            @for (x of fallbackColumns; track x) {
+              <line [attr.x1]="x" [attr.y1]="fallbackLayers[0]" [attr.x2]="x" [attr.y2]="fallbackLayers[4]" />
+            }
           </g>
           <g class="nodes">
-            @for (n of fallbackNodes; track $index) {
-              <circle [attr.cx]="n[0]" [attr.cy]="n[1]" [attr.r]="n[2]" />
+            @for (y of fallbackLayers; track y) {
+              @for (x of fallbackColumns; track x) {
+                <circle [attr.cx]="x" [attr.cy]="y" r="4" />
+              }
             }
           </g>
         </svg>
@@ -68,12 +81,13 @@ function readPalette(element: HTMLElement): ScenePalette {
     </div>
   `,
   styles: `
-    :host { display: block; position: absolute; inset: 0; pointer-events: none; }
+    :host { display: block; position: absolute; inset: 0 0 2.5rem; pointer-events: none; }
     .scene { position: absolute; inset: 0; }
     .scene ::ng-deep canvas { width: 100% !important; height: 100% !important; }
-    .scene[data-mode='webgl'] { animation: fade 900ms var(--ease) both; }
-    .fallback { width: 100%; height: 100%; opacity: 0.8; }
-    .edges path { fill: none; stroke: var(--accent-2); stroke-opacity: 0.35; stroke-width: 1.2; }
+    .scene[data-mode='webgl'] { animation: fade 700ms var(--ease) both; }
+    .fallback { width: 100%; height: 100%; }
+    .plane { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+    .links line { stroke: var(--text-faint); stroke-opacity: 0.45; stroke-width: 1; }
     .nodes circle { fill: var(--accent); }
     @keyframes fade { from { opacity: 0; } }
   `,
@@ -86,23 +100,31 @@ export class HeroSceneComponent {
   private readonly zone = inject(NgZone);
   private readonly loader = inject(NETWORK_SCENE_LOADER);
   private readonly supportsWebGL = inject(WEBGL_SUPPORT);
+  private readonly viewport = inject(SCENE_VIEWPORT);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly mode = signal<'pending' | 'webgl' | 'fallback'>('pending');
-  protected readonly fallbackNodes = [
-    [90, 140, 5], [200, 80, 6], [310, 150, 5], [280, 270, 5], [170, 310, 4], [95, 250, 4], [200, 200, 8],
-  ];
+  readonly mode = signal<'pending' | 'webgl' | 'fallback' | 'off'>('pending');
+  protected readonly fallbackLayers = [90, 145, 200, 255, 310];
+  protected readonly fallbackColumns = [110, 160, 200, 240, 290];
 
   private scene?: NetworkScene;
+  private starting = false;
 
   constructor() {
-    const destroyRef = inject(DestroyRef);
-
     afterNextRender(() => {
       if (!this.supportsWebGL()) {
         this.mode.set('fallback');
         return;
       }
-      void this.init(destroyRef);
+      if (this.viewport && !this.viewport.matches) {
+        this.mode.set('off');
+        // Start later if the window grows to desktop size.
+        const onChange = (e: MediaQueryListEvent) => e.matches && void this.init();
+        this.viewport.addEventListener('change', onChange);
+        this.destroyRef.onDestroy(() => this.viewport?.removeEventListener('change', onChange));
+        return;
+      }
+      void this.init();
     });
 
     effect(() => this.scene?.setReducedMotion(this.motion.reduced()));
@@ -113,7 +135,9 @@ export class HeroSceneComponent {
     });
   }
 
-  private async init(destroyRef: DestroyRef): Promise<void> {
+  private async init(): Promise<void> {
+    if (this.scene || this.starting) return;
+    this.starting = true;
     const element = this.host().nativeElement;
     let factory: NetworkSceneFactory;
     try {
@@ -122,13 +146,13 @@ export class HeroSceneComponent {
       this.mode.set('fallback');
       return;
     }
-    if (destroyRef.destroyed) return;
+    if (this.destroyRef.destroyed) return;
 
     // The animation loop runs outside Angular: no change detection per frame.
     this.zone.runOutsideAngular(() => {
       this.scene = factory(element, {
         reducedMotion: this.motion.reduced(),
-        compact: window.matchMedia('(max-width: 720px)').matches,
+        compact: window.matchMedia('(max-width: 1200px)').matches,
         palette: readPalette(element),
         onContextLost: () => this.zone.run(() => this.fallback()),
       });
@@ -144,7 +168,7 @@ export class HeroSceneComponent {
       resize.observe(element);
       document.addEventListener('visibilitychange', update);
 
-      destroyRef.onDestroy(() => {
+      this.destroyRef.onDestroy(() => {
         intersection.disconnect();
         resize.disconnect();
         document.removeEventListener('visibilitychange', update);

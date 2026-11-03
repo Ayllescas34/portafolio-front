@@ -4,7 +4,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { startWith } from 'rxjs';
 import { ApiError } from '../../core/http/api-error';
-import type { ProjectCategory, ProjectStatus } from '../../core/models/api.models';
+import type { ProjectKind, ProjectStatus } from '../../core/models/api.models';
 import { ToastService } from '../../core/ui/toast.service';
 import { AsyncStateComponent } from '../../shared/ui/async-state';
 import { IconComponent } from '../../shared/ui/icon';
@@ -76,8 +76,12 @@ export class ResourceFormPage {
       title: String(v['title'] || 'Título del proyecto'),
       slug: String(v['slug'] || 'vista-previa'),
       shortDescription: String(v['shortDescription'] || 'La descripción corta aparecerá aquí.'),
-      category: (v['category'] as ProjectCategory) || 'WEB_APP',
+      kind: (v['kind'] as ProjectKind) || 'PERSONAL',
       status: (v['status'] as ProjectStatus) || 'IN_PROGRESS',
+      context: (v['context'] as string) || null,
+      solution: (v['solution'] as string) || null,
+      role: (v['role'] as string) || null,
+      responsibilities: ((v['responsibilities'] as string[] | undefined) ?? []).filter(Boolean),
       coverImageUrl: (v['coverImageUrl'] as string) || null,
       coverImageAlt: (v['coverImageAlt'] as string) || null,
       isFeatured: !!v['isFeatured'],

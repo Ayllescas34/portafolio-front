@@ -68,7 +68,6 @@ h1 {
     margin: 0 0 0.6rem;
     padding-bottom: 0.25rem;
     border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -113,8 +112,8 @@ h1 {
 }
 
 .cv-date {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
   color: var(--text-faint);
   white-space: nowrap;
   text-transform: capitalize;

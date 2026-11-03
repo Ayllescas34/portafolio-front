@@ -3,27 +3,30 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { ActivatedRoute } from '@angular/router';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ApiError } from '../../../core/http/api-error';
-import type { ProjectCategory } from '../../../core/models/api.models';
+import type { ProjectKind } from '../../../core/models/api.models';
 import type { Project } from '../../../core/models/portfolio.models';
 import { AsyncStateComponent } from '../../../shared/ui/async-state';
 import { ProjectCardComponent } from '../../../shared/ui/project-card';
 import { RevealDirective } from '../../../shared/ui/reveal.directive';
 import { PortfolioStore } from '../../data/portfolio.store';
 
+const KINDS: ProjectKind[] = ['PROFESSIONAL', 'PERSONAL', 'ACADEMIC', 'DEMO'];
+
 /**
- * Projects with technology / category filters. Filtering is done by the API
- * (/api/public/projects) and mirrored in the URL (?tecnologia=…&categoria=…)
- * without triggering a navigation, so the page never jumps.
+ * Projects as case studies, filterable by kind and technology. Filtering is
+ * done by the API (/api/public/projects) and mirrored in the URL
+ * (?tipo=…&tecnologia=…) without triggering a navigation, so the page never jumps.
  */
 @Component({
   selector: 'app-projects-section',
   imports: [ProjectCardComponent, AsyncStateComponent, RevealDirective],
   template: `
-    <section id="proyectos" class="section" aria-labelledby="projects-title">
+    <section id="proyectos" class="section section-band" aria-labelledby="projects-title">
       <div class="container">
         <header class="section-header" appReveal>
           <p class="eyebrow">{{ t().projects.eyebrow }}</p>
           <h2 id="projects-title" class="section-title">{{ t().projects.title }}</h2>
+          <p class="lead">{{ t().projects.lead }}</p>
         </header>
 
         @if (allProjects().length === 0) {
@@ -31,40 +34,42 @@ import { PortfolioStore } from '../../data/portfolio.store';
         } @else {
           @if (featured(); as featured) {
             <div class="featured" appReveal>
-              <p class="eyebrow">{{ t().projects.featured }}</p>
+              <p class="featured-label">{{ t().projects.featured }}</p>
               <app-project-card [project]="featured" variant="featured" />
             </div>
           }
 
-          <div class="filters" role="group" [attr.aria-label]="t().projects.filterByTech">
-            <button type="button" class="filter" [attr.aria-pressed]="!technology()" (click)="setTechnology(null)">
-              {{ t().projects.all }}
-            </button>
-            @for (tech of filterOptions().technologies; track tech.slug) {
-              <button
-                type="button"
-                class="filter"
-                [attr.aria-pressed]="technology() === tech.slug"
-                (click)="setTechnology(tech.slug)"
-              >
-                {{ tech.name }} <span class="count">{{ tech.count }}</span>
-              </button>
+          <div class="toolbar">
+            @if (filterOptions().kinds.length > 1) {
+              <div class="filters" role="group" [attr.aria-label]="t().projects.filterByKind">
+                <button type="button" class="filter" [attr.aria-pressed]="!kind()" (click)="setKind(null)">
+                  {{ t().projects.all }}
+                </button>
+                @for (option of kindOptions(); track option.value) {
+                  <button
+                    type="button"
+                    class="filter"
+                    [attr.aria-pressed]="kind() === option.value"
+                    (click)="setKind(option.value)"
+                  >
+                    {{ t().enums.projectKind[option.value] }} <span class="count">{{ option.count }}</span>
+                  </button>
+                }
+              </div>
             }
-          </div>
-          @if (filterOptions().categories.length > 1) {
-            <div class="filters" role="group" [attr.aria-label]="t().projects.filterByCategory">
-              @for (category of filterOptions().categories; track category.value) {
+            <div class="filters" role="group" [attr.aria-label]="t().projects.filterByTech">
+              @for (tech of filterOptions().technologies; track tech.slug) {
                 <button
                   type="button"
-                  class="filter filter-category"
-                  [attr.aria-pressed]="categoryFilter() === category.value"
-                  (click)="setCategory(categoryFilter() === category.value ? null : category.value)"
+                  class="filter filter-tech"
+                  [attr.aria-pressed]="technology() === tech.slug"
+                  (click)="setTechnology(technology() === tech.slug ? null : tech.slug)"
                 >
-                  {{ t().enums.projectCategory[category.value] }}
+                  {{ tech.name }}
                 </button>
               }
             </div>
-          }
+          </div>
 
           <p class="results" role="status" aria-live="polite">
             @if (isFiltering()) {
@@ -97,7 +102,7 @@ export class ProjectsSectionComponent {
   protected readonly t = inject(I18nService).t;
 
   readonly technology = signal<string | null>(null);
-  readonly categoryFilter = signal<ProjectCategory | null>(null);
+  readonly kind = signal<ProjectKind | null>(null);
   readonly state = signal<'ready' | 'loading' | 'error'>('ready');
   private readonly filtered = signal<Project[] | null>(null);
   protected readonly errorText = signal('');
@@ -106,9 +111,13 @@ export class ProjectsSectionComponent {
   protected readonly allProjects = computed(() => this.store.portfolio()?.projects ?? []);
   protected readonly featured = computed(() => this.store.featuredProject());
   protected readonly filterOptions = computed(
-    () => this.store.portfolio()?.projectFilters ?? { technologies: [], categories: [] },
+    () => this.store.portfolio()?.projectFilters ?? { technologies: [], categories: [], kinds: [] },
   );
-  readonly isFiltering = computed(() => !!this.technology() || !!this.categoryFilter());
+  /** Kinds in a stable, meaningful order (professional first). */
+  protected readonly kindOptions = computed(() =>
+    [...this.filterOptions().kinds].sort((a, b) => KINDS.indexOf(a.value) - KINDS.indexOf(b.value)),
+  );
+  readonly isFiltering = computed(() => !!this.technology() || !!this.kind());
   /** Unfiltered, the featured project is already shown above the grid. */
   readonly projects = computed(
     () => this.filtered() ?? this.allProjects().filter((p) => p.id !== this.featured()?.id),
@@ -117,10 +126,10 @@ export class ProjectsSectionComponent {
   constructor() {
     const query = inject(ActivatedRoute).snapshot.queryParamMap;
     const tech = query.get('tecnologia');
-    const category = query.get('categoria') as ProjectCategory | null;
-    if (tech || category) {
+    const kind = query.get('tipo') as ProjectKind | null;
+    if (tech || (kind && KINDS.includes(kind))) {
       this.technology.set(tech);
-      this.categoryFilter.set(category);
+      this.kind.set(kind && KINDS.includes(kind) ? kind : null);
       void this.refresh();
     }
   }
@@ -130,22 +139,22 @@ export class ProjectsSectionComponent {
     void this.refresh();
   }
 
-  setCategory(category: ProjectCategory | null): void {
-    this.categoryFilter.set(category);
+  setKind(kind: ProjectKind | null): void {
+    this.kind.set(kind);
     void this.refresh();
   }
 
   clear(): void {
     this.technology.set(null);
-    this.categoryFilter.set(null);
+    this.kind.set(null);
     void this.refresh();
   }
 
   async refresh(): Promise<void> {
     this.syncUrl();
     const technology = this.technology();
-    const category = this.categoryFilter();
-    if (!technology && !category) {
+    const kind = this.kind();
+    if (!technology && !kind) {
       this.filtered.set(null);
       this.state.set('ready');
       return;
@@ -153,7 +162,7 @@ export class ProjectsSectionComponent {
     const id = ++this.request; // ignore responses that arrive out of order
     this.state.set('loading');
     try {
-      const result = await this.store.projects({ technology, category });
+      const result = await this.store.projects({ technology, kind });
       if (id !== this.request) return;
       this.filtered.set(result);
       this.state.set('ready');
@@ -166,8 +175,8 @@ export class ProjectsSectionComponent {
 
   private syncUrl(): void {
     const params = new URLSearchParams();
+    if (this.kind()) params.set('tipo', this.kind()!);
     if (this.technology()) params.set('tecnologia', this.technology()!);
-    if (this.categoryFilter()) params.set('categoria', this.categoryFilter()!);
     this.location.replaceState(this.location.path().split('?')[0].split('#')[0] || '/', params.toString());
   }
 }

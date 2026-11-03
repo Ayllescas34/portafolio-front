@@ -12,21 +12,21 @@ import { HeroSceneComponent } from '../../hero-scene/hero-scene';
   template: `
     @if (profile(); as profile) {
       <section id="inicio" class="hero" aria-labelledby="hero-title">
-        <div class="hero-backdrop" aria-hidden="true"></div>
-        <div class="hero-visual"><app-hero-scene /></div>
-
-        <div class="container hero-inner">
+        <div class="container hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow">{{ profile.professionalTitle }}</p>
             <h1 id="hero-title">{{ profile.fullName }}</h1>
-            <p class="hero-bio">{{ profile.shortBio }}</p>
+            <p class="role">{{ profile.professionalTitle }}</p>
+            <p class="statement">{{ profile.shortBio }}</p>
+            @if (profile.tagline) {
+              <p class="tagline">{{ profile.tagline }}</p>
+            }
 
             <div class="cta">
-              <a class="btn btn-primary" routerLink="/" fragment="proyectos">
-                {{ t().hero.viewProjects }}<app-icon name="arrow-right" />
+              <a class="btn btn-primary" routerLink="/" fragment="experiencia">
+                {{ t().hero.viewExperience }}<app-icon name="arrow-right" />
               </a>
-              <a class="btn" routerLink="/" fragment="experiencia">{{ t().hero.viewExperience }}</a>
-              <a class="btn btn-ghost" routerLink="/cv"><app-icon name="printer" />{{ t().hero.viewResume }}</a>
+              <a class="btn" routerLink="/" fragment="proyectos">{{ t().hero.viewProjects }}</a>
+              <a class="btn btn-ghost" routerLink="/" fragment="contacto"><app-icon name="mail" />{{ t().hero.contact }}</a>
               @if (profile.cvFileUrl) {
                 <a class="btn btn-ghost" [href]="profile.cvFileUrl" download>
                   <app-icon name="download" />{{ t().hero.downloadCv }}
@@ -35,41 +35,52 @@ import { HeroSceneComponent } from '../../hero-scene/hero-scene';
             </div>
           </div>
 
-          <dl class="summary card" [attr.aria-label]="t().hero.summary">
+          <figure class="hero-visual" aria-hidden="true">
+            <app-hero-scene />
+            <figcaption class="legend">
+              <span class="legend-title">{{ t().hero.visualLegend }}</span>
+              <ol>
+                @for (layer of t().hero.layers; track layer) {
+                  <li>{{ layer }}</li>
+                }
+              </ol>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="container">
+          <dl class="facts" [attr.aria-label]="t().hero.summary">
             @if (current(); as current) {
-              <div class="summary-item">
-                <dt><app-icon name="briefcase" [size]="16" />{{ t().hero.currently }}</dt>
-                <dd>
-                  <strong>{{ current.position }}</strong> {{ t().hero.at }} {{ current.company }}
-                  <span class="badge badge-live">{{ t().experience.present }}</span>
-                </dd>
+              <div>
+                <dt>{{ t().hero.currently }}</dt>
+                <dd>{{ current.position }} {{ t().hero.at }} {{ current.company }}</dd>
               </div>
             }
             @if (since(); as since) {
-              <div class="summary-item">
-                <dt><app-icon name="layers" [size]="16" />{{ t().hero.since }}</dt>
-                <dd>{{ since }}</dd>
+              <div>
+                <dt>{{ t().hero.since }}</dt>
+                <dd class="since">{{ since }}</dd>
               </div>
             }
             @if (profile.location) {
-              <div class="summary-item">
-                <dt><app-icon name="map-pin" [size]="16" />{{ t().hero.based }}</dt>
+              <div>
+                <dt>{{ t().hero.based }}</dt>
                 <dd>{{ profile.location }}</dd>
               </div>
             }
             @if (profile.publicEmail) {
-              <div class="summary-item">
-                <dt><app-icon name="mail" [size]="16" />{{ t().hero.contact }}</dt>
+              <div>
+                <dt>{{ t().hero.email }}</dt>
                 <dd><a [href]="'mailto:' + profile.publicEmail">{{ profile.publicEmail }}</a></dd>
               </div>
             }
             @if (stack().length) {
-              <div class="summary-item summary-stack">
-                <dt><app-icon name="code" [size]="16" />{{ t().hero.stack }}</dt>
+              <div class="facts-stack">
+                <dt>{{ t().hero.stack }}</dt>
                 <dd>
-                  <ul class="chip-list">
+                  <ul class="stack">
                     @for (skill of stack(); track skill.id) {
-                      <li class="chip chip-accent">{{ skill.name }}</li>
+                      <li>{{ skill.name }}</li>
                     }
                   </ul>
                 </dd>
@@ -89,7 +100,15 @@ export class HeroSectionComponent {
   protected readonly t = this.i18n.t;
   protected readonly profile = this.store.profile;
   protected readonly current = this.store.currentExperience;
-  protected readonly stack = computed(() => this.store.featuredSkills().slice(0, 8));
+  /** Technologies of the current role first, then featured skills (deduplicated by name). */
+  protected readonly stack = computed(() => {
+    const current = (this.current()?.technologies ?? []).map((t) => ({ id: t.id, name: t.name }));
+    const featured = this.store.featuredSkills().map((s) => ({ id: s.id, name: s.name }));
+    const seen = new Set<string>();
+    return [...current, ...featured]
+      .filter((item) => !seen.has(item.name.toLowerCase()) && seen.add(item.name.toLowerCase()))
+      .slice(0, 9);
+  });
   protected readonly since = computed(() => {
     const start = this.store.careerStart();
     return start ? formatDate(start, 'MONTH', this.i18n.intlLocale) : null;

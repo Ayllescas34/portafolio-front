@@ -4,41 +4,83 @@ test.describe('Portafolio público', () => {
   test('el reclutador entiende el perfil en la primera pantalla', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: 'Alejandro Flores Yllescas' })).toBeVisible();
-    await expect(page.getByText('Analista Programador · Desarrollo backend').first()).toBeVisible();
+    await expect(page.locator('.hero .role')).toHaveText('Analista Programador Full Stack');
+    await expect(page.locator('.hero .tagline')).toContainText('.NET 8');
     const summary = page.getByLabel('En resumen');
-    await expect(summary).toContainText('Analista Programador');
-    await expect(summary).toContainText('Canella');
-    await expect(summary).toContainText('NestJS');
-    await expect(page).toHaveTitle(/Alejandro Flores Yllescas/);
+    await expect(summary).toContainText('Analista Programador · Canella');
+    await expect(summary).toContainText('.NET 8');
+    await expect(summary).toContainText('OpenShift');
+    await expect(page).toHaveTitle('Alejandro Flores Yllescas | Analista Programador Full Stack');
+    for (const name of ['Ver experiencia', 'Ver proyectos', 'Contactar']) {
+      await expect(page.getByRole('link', { name })).toBeVisible();
+    }
     // Private CV data never reaches the public page.
     await expect(page.locator('body')).not.toContainText('0000-0000');
     await expect(page.locator('body')).not.toContainText('[dato privado]');
     await expect(page.locator('body')).not.toContainText('[dato privado]');
   });
 
+  test('publica metadatos y datos estructurados Person', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('h1')).toBeVisible();
+    const data = JSON.parse((await page.locator('#structured-data').textContent()) ?? '{}');
+    expect(data).toMatchObject({
+      '@type': 'Person',
+      name: 'Alejandro Flores Yllescas',
+      jobTitle: 'Analista Programador Full Stack',
+      worksFor: { name: 'Canella' },
+    });
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /\.NET 8/);
+  });
+
+  test('la escena 3D se muestra en escritorio como acento, sin tapar el texto', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await expect(page.locator('app-hero-scene .scene')).toHaveAttribute('data-mode', /webgl|fallback/);
+    const copy = await page.locator('.hero-copy').boundingBox();
+    const visual = await page.locator('.hero-visual').boundingBox();
+    expect(copy && visual && copy.x + copy.width <= visual.x).toBeTruthy();
+  });
+
   test('la navegación lleva a cada sección y la marca como activa', async ({ page }) => {
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'Navegación principal' });
     for (const [label, id] of [
+      ['Perfil', 'perfil'],
       ['Experiencia', 'experiencia'],
-      ['Habilidades', 'habilidades'],
+      ['Capacidades', 'capacidades'],
       ['Proyectos', 'proyectos'],
+      ['Formación', 'formacion'],
       ['Contacto', 'contacto'],
     ] as const) {
       await nav.getByRole('link', { name: label }).click();
       await expect(page).toHaveURL(new RegExp(`#${id}$`));
       await expect(page.locator(`#${id}`)).toBeInViewport();
     }
+    await expect(page.locator('#experiencia')).toContainText('Participación en migraciones de aplicaciones hacia .NET 8.');
     await expect(page.locator('#experiencia')).toContainText('Municipalidad de Antigua Guatemala');
-    await expect(page.locator('#habilidades')).not.toContainText('%');
   });
 
-  test('filtra proyectos y abre el detalle', async ({ page }) => {
+  test('muestra el flujo del desarrollo al despliegue y capacidades sin porcentajes', async ({ page }) => {
+    await page.goto('/#capacidades');
+    const flow = page.getByRole('list', { name: 'Del desarrollo al despliegue' });
+    await expect(flow.getByRole('listitem')).toHaveCount(7);
+    await expect(flow).toContainText('Despliegue y validación');
+    const section = page.locator('#capacidades');
+    for (const area of ['Desarrollo frontend', 'Desarrollo backend', 'Bases de datos', 'Calidad y pruebas', 'DevOps y despliegue']) {
+      await expect(section.getByRole('heading', { name: area, exact: true, level: 4 })).toBeVisible();
+    }
+    await expect(section).not.toContainText('%');
+  });
+
+  test('filtra proyectos y abre el detalle de un caso', async ({ page }) => {
     await page.goto('/#proyectos');
     const section = page.locator('#proyectos');
-    await expect(section.getByText('Proyecto destacado')).toBeVisible();
-    await section.getByRole('button', { name: /^NestJS/ }).click();
-    await expect(section.getByRole('button', { name: /^NestJS/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(section.getByText('Caso destacado')).toBeVisible();
+    await expect(section.locator('div.featured')).toContainText('Modernización de aplicaciones empresariales');
+
+    await section.getByRole('button', { name: 'NestJS' }).click();
+    await expect(section.getByRole('button', { name: 'NestJS' })).toHaveAttribute('aria-pressed', 'true');
     await expect(section.getByRole('status')).toContainText('1 proyecto');
     await expect(page).toHaveURL(/tecnologia=nestjs/);
     await section.getByRole('button', { name: 'Quitar filtros' }).click();
@@ -47,8 +89,16 @@ test.describe('Portafolio público', () => {
     await section.getByRole('link', { name: 'Portafolio profesional e interactivo' }).first().click();
     await expect(page).toHaveURL(/\/proyectos\/portafolio-profesional$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Portafolio profesional e interactivo' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Problema' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Solución' })).toBeVisible();
+    for (const heading of ['Contexto', 'Problema', 'Solución', 'Arquitectura general', 'Resultado']) {
+      await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    }
+  });
+
+  test('el caso profesional aclara que no revela información confidencial', async ({ page }) => {
+    await page.goto('/proyectos/modernizacion-aplicaciones-empresariales');
+    await expect(page.getByText('Caso profesional').first()).toBeVisible();
+    await expect(page.getByText(/Por confidencialidad no se muestran/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mi participación' })).toBeVisible();
   });
 
   test('un proyecto no publicado no es accesible', async ({ page, allowHttpErrors }) => {
@@ -65,7 +115,10 @@ test.describe('Portafolio público', () => {
     await expect(page.getByRole('button', { name: 'Imprimir / Guardar PDF' })).toBeHidden();
     await expect(page.locator('app-site-header')).toBeHidden();
     await expect(page.locator('footer.footer')).toBeHidden();
-    await expect(page.locator('.sheet')).toContainText('Perito en Computación');
+    const sheet = page.locator('.sheet');
+    await expect(sheet).toContainText('Analista Programador Full Stack');
+    await expect(sheet).toContainText('Perito en Computación');
+    await expect(sheet).toContainText('OpenShift');
   });
 
   test('envía el formulario de contacto local con validación', async ({ page }) => {
@@ -80,7 +133,7 @@ test.describe('Portafolio público', () => {
     await page.getByLabel('Asunto').fill('Oportunidad de prueba');
     await page.getByLabel('Mensaje').fill('Este es un mensaje enviado por la prueba end-to-end.');
     await form.getByRole('button', { name: 'Enviar mensaje' }).click();
-    await expect(page.getByRole('status').filter({ hasText: 'Tu mensaje fue recibido' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'Su mensaje fue recibido' })).toBeVisible();
   });
 
   test('accesibilidad básica: skip link, nombres accesibles y textos alternativos', async ({ page }) => {

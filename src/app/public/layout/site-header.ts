@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/ui/theme.service';
@@ -16,7 +16,10 @@ import { SectionId, SectionSpyService } from './section-spy.service';
       <div class="container bar">
         <a class="brand" routerLink="/" fragment="inicio" (click)="close()">
           <span class="brand-mark" aria-hidden="true">{{ initials() }}</span>
-          <span class="brand-name">{{ name() }}</span>
+          <span class="brand-text">
+            <span class="brand-name">{{ name() }}</span>
+            <span class="brand-role">{{ role() }}</span>
+          </span>
         </a>
 
         <nav [attr.aria-label]="t().nav.main" class="nav" [class.open]="open()" id="site-nav">
@@ -78,6 +81,7 @@ export class SiteHeaderComponent {
   readonly scrolled = signal(false);
 
   protected readonly name = computed(() => this.store.profile()?.fullName ?? '');
+  protected readonly role = computed(() => this.store.profile()?.professionalTitle ?? '');
   protected readonly initials = computed(() =>
     this.name()
       .split(/\s+/)
@@ -91,11 +95,15 @@ export class SiteHeaderComponent {
     const nav = this.t().nav;
     const portfolio = this.store.portfolio();
     const all: { id: SectionId; label: string; show: boolean }[] = [
-      { id: 'sobre-mi', label: nav.about, show: true },
+      { id: 'perfil', label: nav.about, show: true },
       { id: 'experiencia', label: nav.experience, show: true },
-      { id: 'habilidades', label: nav.skills, show: true },
+      { id: 'capacidades', label: nav.skills, show: true },
       { id: 'proyectos', label: nav.projects, show: true },
-      { id: 'educacion', label: nav.education, show: (portfolio?.education.length ?? 1) > 0 },
+      {
+        id: 'formacion',
+        label: nav.education,
+        show: (portfolio?.education.length ?? 1) + (portfolio?.certifications.length ?? 0) > 0,
+      },
       { id: 'contacto', label: nav.contact, show: true },
     ];
     return all.filter((l) => l.show);

@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { ThemeService } from '../../core/ui/theme.service';
 import { IconComponent, IconName } from '../../shared/ui/icon';
 import { ToastsComponent } from '../../shared/ui/toasts';
 import { PortfolioStore } from '../data/portfolio.store';
@@ -44,7 +45,7 @@ const SOCIAL_ICONS: Record<string, IconName> = { GITHUB: 'github', LINKEDIN: 'li
       </div>
       <div class="container footer-meta">
         <span>© {{ year }} {{ profile()?.fullName }}</span>
-        <span class="mono">{{ t().footer.builtWith }}</span>
+        <span>{{ t().footer.builtWith }}</span>
       </div>
     </footer>
     <app-toasts />
@@ -53,7 +54,7 @@ const SOCIAL_ICONS: Record<string, IconName> = { GITHUB: 'github', LINKEDIN: 'li
     main { outline: none; }
     .footer { border-top: 1px solid var(--border); background: var(--bg-elevated); padding-block: 2.5rem 1.5rem; }
     .footer-inner { display: flex; flex-wrap: wrap; gap: 1.5rem 3rem; justify-content: space-between; align-items: flex-start; }
-    .footer-name { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; }
+    .footer-name { margin: 0; font-weight: 650; font-size: 1.05rem; }
     .footer-inner .muted { margin: 0; }
     .footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0; padding: 0; list-style: none; }
     .footer-links a { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--text-muted); text-decoration: none; font-size: 0.92rem; }
@@ -71,6 +72,12 @@ export class PublicShellComponent {
 
   constructor() {
     void this.store.load();
+    // Default theme configured in the admin panel (the visitor's own choice still wins).
+    const theme = inject(ThemeService);
+    effect(() => {
+      const preference = this.store.portfolio()?.site.defaultTheme;
+      if (preference) theme.useSiteDefault(preference);
+    });
   }
 
   protected icon(platform: string): IconName {

@@ -1,38 +1,63 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { IconComponent } from '../../../shared/ui/icon';
 import { RevealDirective } from '../../../shared/ui/reveal.directive';
 import { PortfolioStore } from '../../data/portfolio.store';
 
-/** Skills grouped by category. Qualitative only: no percentage bars. */
+/**
+ * "Capacidades": the end-to-end delivery flow (from the DELIVERY_STAGE
+ * highlights) followed by skills grouped by professional area. Qualitative
+ * only: no percentages or progress bars.
+ */
 @Component({
   selector: 'app-skills-section',
-  imports: [IconComponent, RevealDirective],
+  imports: [RevealDirective],
   template: `
-    <section id="habilidades" class="section" aria-labelledby="skills-title">
+    <section id="capacidades" class="section" aria-labelledby="capabilities-title">
       <div class="container">
         <header class="section-header" appReveal>
           <p class="eyebrow">{{ t().skills.eyebrow }}</p>
-          <h2 id="skills-title" class="section-title">{{ t().skills.title }}</h2>
-          <p class="lead">{{ t().skills.lead }}</p>
+          <h2 id="capabilities-title" class="section-title">{{ t().delivery.title }}</h2>
+          <p class="lead">{{ t().delivery.lead }}</p>
         </header>
-        <div class="grid">
-          @for (category of categories(); track category.id) {
-            <article class="card category" appReveal>
-              <h3>{{ category.name }}</h3>
-              @if (category.description) {
-                <p class="muted">{{ category.description }}</p>
+
+        @if (stages().length) {
+          <ol class="flow" [attr.aria-label]="t().delivery.title" appReveal>
+            @for (stage of stages(); track stage.id; let i = $index) {
+              <li class="stage">
+                <span class="step tabular" aria-hidden="true">{{ i + 1 }}</span>
+                <h3>
+                  <span class="visually-hidden">{{ t().delivery.step }} {{ i + 1 }}:</span>
+                  {{ stage.title }}
+                </h3>
+                <p>{{ stage.description }}</p>
+              </li>
+            }
+          </ol>
+        }
+
+        <div class="areas-header" appReveal>
+          <h3 class="subtitle">{{ t().skills.title }}</h3>
+          <p class="muted">{{ t().skills.lead }}</p>
+        </div>
+        <div class="areas">
+          @for (area of areas(); track area.id) {
+            <article class="area" appReveal>
+              <h4>{{ area.name }}</h4>
+              @if (area.description) {
+                <p class="area-description">{{ area.description }}</p>
               }
-              <ul class="chip-list">
-                @for (skill of category.skills; track skill.id) {
-                  <li class="chip" [class.chip-accent]="skill.isFeatured" [attr.title]="skill.description">
+              <ul class="skills">
+                @for (skill of area.skills; track skill.id) {
+                  <li [class.featured]="skill.isFeatured">
+                    <span class="skill-name">{{ skill.name }}</span>
                     @if (skill.isFeatured) {
-                      <app-icon name="star" [size]="13" />
-                      <span class="visually-hidden">{{ t().skills.featured }}:</span>
+                      <span class="visually-hidden">({{ t().skills.featured }})</span>
                     }
-                    {{ skill.name }}
+                    @if (skill.description) {
+                      <span class="skill-note">{{ skill.description }}</span>
+                    }
                     @if (skill.proficiencyLabel) {
-                      <span class="level">· {{ skill.proficiencyLabel }}</span>
+                      <span class="skill-note">{{ skill.proficiencyLabel }}</span>
                     }
                   </li>
                 }
@@ -43,19 +68,14 @@ import { PortfolioStore } from '../../data/portfolio.store';
       </div>
     </section>
   `,
-  styles: `
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-    .category { padding: 1.35rem 1.4rem 1.5rem; }
-    h3 { margin-bottom: 0.9rem; font-size: 1.05rem; font-family: var(--font-mono); font-weight: 500; letter-spacing: 0; color: var(--text); }
-    .muted { font-size: 0.9rem; }
-    .chip { font-size: 0.86rem; color: var(--text); }
-    .chip-accent { color: var(--accent); }
-    .level { color: var(--text-faint); }
-  `,
+  styleUrl: './skills-section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkillsSectionComponent {
   private readonly store = inject(PortfolioStore);
   protected readonly t = inject(I18nService).t;
-  protected readonly categories = computed(() => this.store.portfolio()?.skillCategories ?? []);
+  protected readonly areas = computed(() => this.store.portfolio()?.skillCategories ?? []);
+  protected readonly stages = computed(() =>
+    (this.store.portfolio()?.highlights ?? []).filter((h) => h.kind === 'DELIVERY_STAGE'),
+  );
 }

@@ -7,8 +7,13 @@ export function projectFixture(overrides: Partial<Project> = {}): Project {
     slug: 'proyecto',
     shortDescription: 'Descripción',
     fullDescription: null,
+    kind: 'PERSONAL',
+    context: null,
     problem: 'Problema',
     solution: 'Solución',
+    architecture: null,
+    challenges: null,
+    outcome: null,
     role: null,
     category: 'WEB_APP',
     status: 'IN_PROGRESS',
@@ -42,6 +47,7 @@ export function portfolioFixture(overrides: Partial<Portfolio> = {}): Portfolio 
       fullName: 'Persona Prueba',
       professionalTitle: 'Desarrollador',
       shortBio: 'Bio corta',
+      tagline: 'Texto complementario',
       longBio: 'Párrafo uno.\n\nPárrafo dos.',
       location: 'Ciudad, País',
       publicEmail: 'persona@test.local',
@@ -52,7 +58,11 @@ export function portfolioFixture(overrides: Partial<Portfolio> = {}): Portfolio 
       cvFileUrl: null,
       updatedAt: '2026-01-01T00:00:00.000Z',
     },
-    highlights: [{ id: 'h1', kind: 'WORK_STYLE', title: 'Resolver problemas', description: 'Texto' }],
+    highlights: [
+      { id: 'h1', kind: 'WORK_STYLE', title: 'Resolver problemas', description: 'Texto' },
+      { id: 'd1', kind: 'DELIVERY_STAGE', title: 'Pruebas', description: 'Pruebas funcionales y técnicas.' },
+      { id: 'd2', kind: 'DELIVERY_STAGE', title: 'Despliegue y validación', description: 'Publicación y validación.' },
+    ],
     socialLinks: [],
     experiences: [
       {
@@ -105,7 +115,7 @@ export function portfolioFixture(overrides: Partial<Portfolio> = {}): Portfolio 
     ],
     certifications: [],
     projects: [
-      projectFixture({ id: 'p1', slug: 'destacado', title: 'Destacado', isFeatured: true }),
+      projectFixture({ id: 'p1', slug: 'destacado', title: 'Destacado', isFeatured: true, kind: 'PROFESSIONAL' }),
       projectFixture({ id: 'p2', slug: 'otro', title: 'Otro', category: 'API' }),
     ],
     projectFilters: {
@@ -113,6 +123,10 @@ export function portfolioFixture(overrides: Partial<Portfolio> = {}): Portfolio 
       categories: [
         { value: 'WEB_APP', count: 1 },
         { value: 'API', count: 1 },
+      ],
+      kinds: [
+        { value: 'PERSONAL', count: 1 },
+        { value: 'PROFESSIONAL', count: 1 },
       ],
     },
     ...overrides,

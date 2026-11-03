@@ -4,6 +4,7 @@ import type {
   EmploymentType,
   HighlightKind,
   ProjectCategory,
+  ProjectKind,
   ProjectStatus,
   SocialPlatform,
   ThemePreference,
@@ -32,6 +33,7 @@ export interface PublicProfile {
   fullName: string;
   professionalTitle: string;
   shortBio: string;
+  tagline: string | null;
   longBio: string | null;
   location: string | null;
   publicEmail: string | null;
@@ -132,8 +134,13 @@ export interface Project {
   slug: string;
   shortDescription: string;
   fullDescription: string | null;
+  kind: ProjectKind;
+  context: string | null;
   problem: string | null;
   solution: string | null;
+  architecture: string | null;
+  challenges: string | null;
+  outcome: string | null;
   role: string | null;
   category: ProjectCategory;
   status: ProjectStatus;
@@ -153,6 +160,7 @@ export interface Project {
 export interface ProjectFilters {
   technologies: { name: string; slug: string; count: number }[];
   categories: { value: ProjectCategory; count: number }[];
+  kinds: { value: ProjectKind; count: number }[];
 }
 
 export interface Portfolio {

@@ -19,8 +19,6 @@
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
     "@fontsource-variable/inter": "^5.2.8",
-    "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "@fontsource-variable/space-grotesk": "^5.2.10",
     "rxjs": "~7.8.0",
     "three": "^0.181.2",
     "tslib": "^2.3.0",

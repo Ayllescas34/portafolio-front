@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ApiError } from '../../core/http/api-error';
@@ -25,6 +25,24 @@ export class ProjectDetailPage {
   protected readonly t = inject(I18nService).t;
 
   readonly project = signal<Project | null>(null);
+
+  /** Case-study narrative in reading order; empty fields are simply omitted. */
+  protected readonly blocks = computed(() => {
+    const p = this.project();
+    if (!p) return [];
+    const t = this.t().projects;
+    return [
+      [t.context, p.context],
+      [t.problem, p.problem],
+      [t.solution, p.solution],
+      [t.architecture, p.architecture],
+      [t.challenges, p.challenges],
+      [t.outcome, p.outcome],
+      ['', p.fullDescription],
+    ]
+      .filter((entry): entry is [string, string] => !!entry[1])
+      .map(([title, text]) => ({ title, paragraphs: text.split(/\n{2,}/) }));
+  });
   readonly state = signal<'loading' | 'ready' | 'error' | 'not-found'>('loading');
   protected readonly errorText = signal('');
 
