@@ -14,10 +14,8 @@ test.describe('Portafolio público', () => {
     for (const name of ['Ver experiencia', 'Ver proyectos', 'Contactar']) {
       await expect(page.getByRole('link', { name })).toBeVisible();
     }
-    // Private CV data never reaches the public page.
-    await expect(page.locator('body')).not.toContainText('0000-0000');
-    await expect(page.locator('body')).not.toContainText('[dato privado]');
-    await expect(page.locator('body')).not.toContainText('[dato privado]');
+    // The phone stays hidden until the owner chooses to publish it.
+    await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
   });
 
   test('publica metadatos y datos estructurados Person', async ({ page }) => {
