@@ -27,7 +27,7 @@ test.describe.serial('Panel administrativo', () => {
     // Create
     await page.getByRole('navigation', { name: 'Administración' }).getByRole('link', { name: 'Proyectos' }).click();
     await page.getByRole('link', { name: 'Nuevo proyecto' }).click();
-    await page.getByLabel('Título', { exact: true }).fill(TITLE);
+    await page.getByRole('textbox', { name: 'Título', exact: true }).fill(TITLE);
     await page.getByLabel('Descripción corta').fill('Registro creado por la prueba end-to-end.');
     await page.getByLabel('Problema').fill('Validar el flujo completo del panel.');
     await page.getByRole('group', { name: 'Tecnologías' }).getByLabel('Angular').check();
@@ -39,7 +39,7 @@ test.describe.serial('Panel administrativo', () => {
     await expect(page.getByRole('heading', { name: 'Editar proyecto' })).toBeVisible();
 
     // Edit
-    await page.getByLabel('Título', { exact: true }).fill(EDITED);
+    await page.getByRole('textbox', { name: 'Título', exact: true }).fill(EDITED);
     await page.getByRole('button', { name: 'Guardar' }).click();
     await expect(page.getByText('Cambios guardados.')).toBeVisible();
     const slug = await page.getByLabel('Slug (URL)').inputValue();
@@ -73,11 +73,22 @@ test.describe.serial('Panel administrativo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
-  test('muestra el mensaje recibido desde el formulario de contacto', async ({ page }) => {
+  test('la bandeja muestra un mensaje recibido y lo marca como leído', async ({ page, allowHttpErrors }) => {
+    allowHttpErrors(/\/api\/auth\/me/);
+    const subject = `Consulta E2E ${Date.now()}`;
+    const sent = await page.request.post('/api/public/contact', {
+      data: { name: 'Visitante E2E', email: 'visitante@example.com', subject, message: 'Mensaje para la bandeja.', website: '' },
+    });
+    expect(sent.status()).toBe(202);
+
     await login(page);
     await page.getByRole('link', { name: /mensaje/i }).first().click();
-    await page.getByRole('tab', { name: 'Todos' }).click();
-    await expect(page.getByText('Oportunidad de prueba').first()).toBeVisible();
+    const message = page.getByRole('button', { name: new RegExp(subject) });
+    await expect(message).toBeVisible();
+    await message.click();
+    await expect(page.getByText('Mensaje para la bandeja.')).toBeVisible();
+    await page.getByRole('tab', { name: 'Leídos' }).click();
+    await expect(page.getByRole('button', { name: new RegExp(subject) })).toBeVisible();
   });
 
   test('cerrar sesión revoca el acceso a las rutas protegidas', async ({ page, allowHttpErrors }) => {
