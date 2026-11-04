@@ -37,11 +37,7 @@
               }
             ],
             "styles": [
-              "@fontsource-variable/inter/wght.css",
-              "@fontsource-variable/jetbrains-mono/wght.css",
-              "@fontsource/poppins/500.css",
-              "@fontsource/poppins/600.css",
-              "@fontsource/poppins/700.css",
+              "@fontsource-variable/ibm-plex-sans/wght.css",
               "src/styles.scss"
             ]
           },

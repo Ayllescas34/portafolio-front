@@ -4,15 +4,9 @@
 
 .featured-label {
   margin-bottom: 1rem;
-  font-family: var(--font-mono);
   font-size: 0.82rem;
-  text-transform: lowercase;
   color: var(--accent);
 
-  &::before {
-    content: '// ';
-    color: var(--accent-2);
-  }
 }
 
 .toolbar {
@@ -60,7 +54,6 @@
 }
 
 .filter-tech {
-  font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-faint);
@@ -68,7 +61,6 @@
 
 .count {
   margin-left: 0.1rem;
-  font-family: var(--font-mono);
   font-size: 0.68rem;
   color: var(--accent);
 }

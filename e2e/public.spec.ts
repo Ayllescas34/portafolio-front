@@ -25,7 +25,7 @@ test.describe('Portafolio público', () => {
     for (const width of [1121, 1280, 1366, 1440]) {
       await page.setViewportSize({ width, height: 800 });
       const fits = await page.evaluate(() => {
-        const logo = document.querySelector<HTMLElement>('.logo')!;
+        const logo = document.querySelector<HTMLElement>('.brand')!;
         const bar = document.querySelector<HTMLElement>('.bar')!;
         return logo.scrollWidth <= logo.clientWidth && bar.scrollWidth <= bar.clientWidth;
       });

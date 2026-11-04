@@ -74,10 +74,6 @@ import { HeroSceneComponent } from '../../hero-scene/hero-scene';
               </div>
             }
           </dl>
-
-          <a class="scroll" routerLink="/" fragment="perfil" [attr.aria-label]="t().hero.scroll">
-            <span class="mouse" aria-hidden="true"><span class="wheel"></span></span>
-          </a>
         </div>
       </section>
     }

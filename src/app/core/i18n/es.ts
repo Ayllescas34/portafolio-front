@@ -31,7 +31,6 @@ export const es = {
     based: 'Ubicación',
     email: 'Correo',
     stack: 'Tecnologías principales',
-    scroll: 'Ir al perfil',
     backToTop: 'Volver arriba',
   },
   about: {

@@ -59,7 +59,7 @@ import { SkillsSectionComponent } from './sections/skills-section';
       place-items: center;
       min-height: 100dvh;
       margin-top: calc(-1 * var(--header-h));
-      background: #15161b;
+      background: #0a101c;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
