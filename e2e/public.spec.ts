@@ -136,9 +136,9 @@ test.describe('Portafolio público', () => {
     await expect(page.getByRole('heading', { name: 'Mi participación' })).toBeVisible();
   });
 
-  test('un proyecto no publicado no es accesible', async ({ page, allowHttpErrors }) => {
-    allowHttpErrors(/\/api\/public\/projects\/control-de-gastos/);
-    await page.goto('/proyectos/control-de-gastos');
+  test('un proyecto inexistente muestra el aviso', async ({ page, allowHttpErrors }) => {
+    allowHttpErrors(/\/api\/public\/projects\/proyecto-inexistente/);
+    await page.goto('/proyectos/proyecto-inexistente');
     await expect(page.getByRole('heading', { name: 'El proyecto no existe o no está publicado.' })).toBeVisible();
   });
 
