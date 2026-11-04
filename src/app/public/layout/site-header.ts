@@ -14,13 +14,11 @@ import { SectionId, SectionSpyService } from './section-spy.service';
   template: `
     <header class="header force-dark" [class.scrolled]="scrolled()" [class.overlay]="overlay()">
       <div class="bar">
-        <a class="brand" routerLink="/" fragment="inicio" [attr.aria-label]="logo() + ' · ' + name()" (click)="close()">
-          <span class="logo" aria-hidden="true">{{ logo() }}<span class="dot">.</span><span class="cursor">_</span></span>
-        </a>
+        <a class="brand" routerLink="/" fragment="inicio" [attr.aria-label]="name()" (click)="close()">{{ logo() }}</a>
 
         <nav [attr.aria-label]="t().nav.main" class="nav" [class.open]="open()" id="site-nav">
           <ul>
-            @for (link of links(); track link.id; let i = $index) {
+            @for (link of links(); track link.id) {
               <li>
                 <a
                   routerLink="/"
@@ -29,9 +27,7 @@ import { SectionId, SectionSpyService } from './section-spy.service';
                   [attr.aria-current]="spy.active() === link.id ? 'location' : null"
                   (click)="close()"
                 >
-                  <span class="slashes" aria-hidden="true">//</span>
                   {{ link.label }}
-                  <sup aria-hidden="true">{{ number(i) }}</sup>
                 </a>
               </li>
             }
@@ -88,8 +84,8 @@ export class SiteHeaderComponent {
   protected readonly overlay = computed(() => this.isHome() && !this.scrolled() && !this.open());
 
   protected readonly name = computed(() => this.store.profile()?.fullName ?? '');
-  /** "Alejandro Flores Yllescas" -> "AlejandroFlores" */
-  protected readonly logo = computed(() => this.name().split(/\s+/).slice(0, 2).join(''));
+  /** "Alejandro Flores Yllescas" -> "Alejandro Flores" */
+  protected readonly logo = computed(() => this.name().split(/\s+/).slice(0, 2).join(' '));
 
   protected readonly links = computed(() => {
     const nav = this.t().nav;

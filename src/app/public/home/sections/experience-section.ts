@@ -23,7 +23,7 @@ import { PortfolioStore } from '../../data/portfolio.store';
                 <details [open]="item.isCurrent">
                   <summary>
                     <span class="title">
-                      {{ item.position }} <span class="at">&#64;</span> {{ item.company }}
+                      {{ item.position }} <span class="at">en</span> {{ item.company }}
                       @if (item.isCurrent) {
                         <span class="current">{{ t().experience.current }}</span>
                       }

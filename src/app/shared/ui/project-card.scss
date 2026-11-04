@@ -28,7 +28,7 @@
 
 .media {
   aspect-ratio: 16 / 5;
-  background: #211c33;
+  background: #131f33;
 
   // Real screenshots need a taller frame than the generated cover.
   &:has(img) {
@@ -36,7 +36,7 @@
   }
 
   &.professional {
-    background: #16303a;
+    background: #122a45;
   }
 
   img {
@@ -54,19 +54,10 @@
   gap: 0.5rem;
   height: 100%;
   padding: 1.25rem 1.5rem;
-  color: #66d9ed;
+  color: #a9cdf5;
   background:
     linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px) 0 0 / 100% 26px,
-    radial-gradient(90% 120% at 100% 0%, rgb(187 119 255 / 0.28), transparent 65%);
-}
-
-.path {
-  overflow: hidden;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: rgb(255 255 255 / 0.72);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    radial-gradient(90% 120% at 100% 0%, rgb(130 182 240 / 0.2), transparent 65%);
 }
 
 .content {
@@ -126,7 +117,6 @@ h3 {
   margin: auto 0 0;
   padding: 0.85rem 0 0;
   list-style: none;
-  font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--accent);
 }
@@ -145,7 +135,6 @@ h3 {
 
   h3 {
     margin-bottom: 0.75rem;
-    font-family: var(--font-mono);
     font-size: clamp(1.45rem, 2.6vw, 2rem);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -183,16 +172,10 @@ h3 {
   }
 
   dt {
-    font-family: var(--font-mono);
     font-size: 0.78rem;
-    text-transform: lowercase;
     color: var(--accent);
   }
 
-  dt::before {
-    content: '// ';
-    color: var(--accent-2);
-  }
 
   dd {
     margin: 0.3rem 0 0;

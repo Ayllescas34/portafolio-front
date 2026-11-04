@@ -50,7 +50,6 @@
   border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--accent);
-  font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -108,8 +107,8 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
-  border: 2px solid var(--border-strong);
-  background: var(--border-strong);
+  border: 1px solid var(--border);
+  background: var(--border);
 }
 
 .area {
@@ -150,30 +149,8 @@
   }
 }
 
-// Solid underline hugging the first word.
-.mark {
-  --mark: var(--accent);
-  background: linear-gradient(var(--mark), var(--mark)) 0 88% / 100% 0.14em no-repeat;
-}
-
-.area:nth-child(3n + 2) .mark {
-  --mark: var(--accent-2);
-}
-
-.area:nth-child(3n) .mark {
-  --mark: #f0935a;
-}
-
-.tag {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--text-faint);
-}
-
 .area-body {
-  margin: 0.4rem 0 0.4rem 0.75rem;
-  padding-left: 1rem;
-  border-left: 1px solid var(--border-strong);
+  margin: 0.75rem 0 0;
 }
 
 .area-description {
@@ -188,7 +165,6 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-family: var(--font-mono);
   font-size: 0.86rem;
 
   li {

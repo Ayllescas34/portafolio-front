@@ -78,7 +78,6 @@ export type ProjectCardData = Pick<
           } @else {
             <div class="generated" aria-hidden="true">
               <app-icon [name]="icon()" [size]="34" />
-              <span class="path">/{{ p.slug }}</span>
             </div>
           }
         </div>

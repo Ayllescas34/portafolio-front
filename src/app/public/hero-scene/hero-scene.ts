@@ -41,7 +41,7 @@ export const WEBGL_SUPPORT = new InjectionToken<() => boolean>('WEBGL_SUPPORT', 
   },
 });
 
-/** Small screens get a lighter scene: fewer blocks, no antialias, lower pixel ratio. */
+/** Small screens get a lighter scene: fewer lines, no antialias, lower pixel ratio. */
 export const SCENE_COMPACT = new InjectionToken<() => boolean>('SCENE_COMPACT', {
   providedIn: 'root',
   factory: () => () => window.matchMedia('(max-width: 900px)').matches,
@@ -58,19 +58,12 @@ export const SCENE_COMPACT = new InjectionToken<() => boolean>('SCENE_COMPACT', 
     <div class="scene" #host aria-hidden="true" [attr.data-mode]="mode()">
       @if (mode() === 'fallback') {
         <svg class="fallback" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" role="presentation">
-          <defs>
-            <radialGradient id="scene-glow">
-              <stop offset="0" stop-color="#ff9142" stop-opacity="0.35" />
-              <stop offset="1" stop-color="#ff9142" stop-opacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="760" cy="210" r="260" fill="url(#scene-glow)" />
-          <g class="cube">
-            <path class="top" d="M600 190 760 270 600 350 440 270Z" />
-            <path class="left" d="M440 270 600 350V530L440 450Z" />
-            <path class="right" d="M760 270 600 350V530L760 450Z" />
+          <g fill="none" stroke="#82b6f0" stroke-opacity="0.32">
+            <path d="M420 560C620 500 760 620 960 560S1120 500 1200 520" />
+            <path d="M380 610C600 550 760 670 960 610S1120 550 1200 570" />
+            <path d="M340 660C580 600 760 720 960 660S1120 600 1200 620" />
+            <path d="M300 710C560 650 760 770 960 710S1120 650 1200 670" />
           </g>
-          <circle cx="760" cy="210" r="22" fill="#ffdcae" />
         </svg>
       }
     </div>
@@ -81,9 +74,6 @@ export const SCENE_COMPACT = new InjectionToken<() => boolean>('SCENE_COMPACT', 
     .scene ::ng-deep canvas { width: 100% !important; height: 100% !important; }
     .scene[data-mode='webgl'] { animation: fade 900ms var(--ease) both; }
     .fallback { width: 100%; height: 100%; }
-    .top { fill: #4a3a33; }
-    .left { fill: #1d2b3d; }
-    .right { fill: #2a2233; }
     @keyframes fade { from { opacity: 0; } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

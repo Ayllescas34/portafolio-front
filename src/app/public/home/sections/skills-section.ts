@@ -55,9 +55,8 @@ const AREA_ICONS: Record<string, IconName> = {
             <article class="area">
               <div class="area-head">
                 <app-icon [name]="area.icon" [size]="38" />
-                <h4><span class="mark">{{ area.first }}</span> {{ area.rest }}</h4>
+                <h4>{{ area.name }}</h4>
               </div>
-              <span class="tag" aria-hidden="true">&lt;{{ area.slug }}&gt;</span>
               <div class="area-body">
                 @if (area.description) {
                   <p class="area-description">{{ area.description }}</p>
@@ -79,7 +78,6 @@ const AREA_ICONS: Record<string, IconName> = {
                   }
                 </ul>
               </div>
-              <span class="tag" aria-hidden="true">&lt;/{{ area.slug }}&gt;</span>
             </article>
           }
         </div>
@@ -93,10 +91,10 @@ export class SkillsSectionComponent {
   private readonly store = inject(PortfolioStore);
   protected readonly t = inject(I18nService).t;
   protected readonly areas = computed(() =>
-    (this.store.portfolio()?.skillCategories ?? []).map((category) => {
-      const [first, ...rest] = category.name.split(' ');
-      return { ...category, first, rest: rest.join(' '), icon: AREA_ICONS[category.slug] ?? 'code' };
-    }),
+    (this.store.portfolio()?.skillCategories ?? []).map((category) => ({
+      ...category,
+      icon: AREA_ICONS[category.slug] ?? 'code',
+    })),
   );
   protected readonly stages = computed(() =>
     (this.store.portfolio()?.highlights ?? []).filter((h) => h.kind === 'DELIVERY_STAGE'),
