@@ -64,14 +64,17 @@ habla con un origen.
 Las pruebas E2E buscan la API en `../backend`. Si está en otra carpeta, indícala en `BACKEND_DIR`.
 Incluyen una revisión de accesibilidad con axe sobre el sitio y el panel, en ambos temas.
 
+## Publicación
+
+`deploy/publish.sh` compila el sitio y lo publica en S3 y CloudFront. La guía completa está en la
+[documentación de despliegue](https://github.com/Ayllescas34/portafolio-backend/blob/main/docs/despliegue.md).
+
+La política de seguridad de producción bloquea los scripts en línea: el código que debe correr antes
+de Angular va en `public/boot.js`.
+
 ## Flujo de trabajo
 
 - `main` siempre debe estar estable.
 - Cada cambio se trabaja en una rama `feat/...` o `fix/...` y entra por pull request.
 - La integración continua ejecuta lint, pruebas unitarias, compilación y pruebas E2E en cada push a
   `main` y en cada pull request.
-
-## Problemas conocidos
-
-- El script de `index.html` que aplica el tema antes de cargar Angular necesitará un hash CSP cuando
-  se configure producción.
