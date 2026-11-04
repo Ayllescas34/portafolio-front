@@ -136,6 +136,12 @@ test.describe('Portafolio público', () => {
     await expect(page.getByRole('heading', { name: 'Mi participación' })).toBeVisible();
   });
 
+  test('un proyecto con enlaces públicos no muestra el aviso de confidencialidad', async ({ page }) => {
+    await page.goto('/proyectos/hotel-quinta-vista-verde');
+    await expect(page.getByRole('heading', { level: 1, name: /Hotel Quinta Vista Verde/ })).toBeVisible();
+    await expect(page.getByText(/Por confidencialidad no se muestran/)).toHaveCount(0);
+  });
+
   test('un proyecto inexistente muestra el aviso', async ({ page, allowHttpErrors }) => {
     allowHttpErrors(/\/api\/public\/projects\/proyecto-inexistente/);
     await page.goto('/proyectos/proyecto-inexistente');
