@@ -8,7 +8,7 @@ Yllescas.
 La API, la base de datos y la documentación técnica están en
 [portafolio-backend](https://github.com/Ayllescas34/portafolio-backend).
 
-> **Estado:** funciona en entorno local. Todavía no está desplegado.
+> **Estado:** publicado en https://d2nzry7t82pbvf.cloudfront.net
 
 ## Stack
 
