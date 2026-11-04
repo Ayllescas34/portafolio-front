@@ -21,7 +21,7 @@
             <p class="eyebrow">{{ t().enums.projectKind[p.kind] }}</p>
             <h1 id="project-title">{{ p.title }}</h1>
             <p class="lead">{{ p.shortDescription }}</p>
-            @if (p.kind === 'PROFESSIONAL') {
+            @if (p.kind === 'PROFESSIONAL' && !p.liveUrl && !p.repositoryUrl) {
               <p class="confidential"><app-icon name="alert" [size]="16" />{{ t().projects.confidential }}</p>
             }
           </header>
